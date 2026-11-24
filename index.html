@@ -1012,7 +1012,7 @@ if(GC_CODE){ var gs = document.createElement('script'); gs.async = true; gs.src 
   if(via) gcCount('via-' + via);
   /* ?via=selftest: fire every funnel event once, plain + ".selftest", so delivery can be checked from a real browser on the laptop
      (GoatCounter filters server browsers). marketing/ledger.py takes each ".selftest" copy back out of the plain count. */
-  if(via === 'selftest') setTimeout(function(){ Object.keys(FUNNEL_EV).forEach(function(n, i){ setTimeout(function(){ gcCount(n); gcCount(n + '.selftest'); }, i * 1200); }); }, 1500);
+  if(via === 'selftest') setTimeout(function(){ Object.keys(FUNNEL_EV).forEach(function(n, i){ setTimeout(function(){ gcCount(n); setTimeout(function(){ gcCount(n + '.selftest'); }, 1250); }, i * 2500); }); }, 1500);
   if(af) track('aff-' + af);
   if(q.get('bought') === '1') track('bought-return');
   if(q.get('bought') === '1' && !isPro()){
