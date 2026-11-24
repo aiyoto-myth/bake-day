@@ -1,0 +1,983 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Micro Bakery Production Sheet: Orders to Dough, Levain &amp; Bake Schedule (Free) | Bake Day</title>
+<meta name="description" content="Free micro bakery production planner. Enter your breads and this bake's orders; get total dough, mixer batches, one combined levain build, a clock schedule worked back from oven-out, oven loads, and a printable production sheet. No sign-up.">
+<link rel="canonical" href="https://samsbench.com/bake-day/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Bake Day: orders in, production sheet out">
+<meta property="og:description" content="Breads × orders → dough for every mix, one levain build, and a clock schedule back from the time the last loaf leaves the oven. Free, no sign-up.">
+<meta property="og:url" content="https://samsbench.com/bake-day/">
+<meta property="og:image" content="https://samsbench.com/bake-day/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bench:#E9DFCC; --flour:#FBF7EF; --card:#FFFDF8; --ink:#24170E; --ink2:#4B3A2C; --line:#D8C9AF; --rule:#C2B092;
+  --crust:#9C4A1A; --crustInk:#fff; --char:#24170E; --proof:#E8B547; --warn:#8A3B12; --warnBg:#FBE7D3; --ok:#2F5D3A;
+  --focus:#1F5FBF;
+  --serif:"Young Serif",Georgia,serif; --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bench);color:var(--ink);font:16px/1.5 var(--sans)}
+a{color:var(--crust)}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+button,input,select,textarea{font:inherit;color:inherit}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+/* ---- top ---- */
+.top{background:var(--char);color:var(--flour)}
+.top .in{max-width:1240px;margin:0 auto;padding:28px 18px 24px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px;align-items:end}
+.top h1{font-family:var(--serif);font-weight:400;font-size:clamp(32px,5.4vw,58px);line-height:1.02;margin:0;letter-spacing:-.01em}
+.top h1 span{color:var(--proof)}
+.top p{margin:12px 0 0;font-size:18px;max-width:680px}
+.top .cta{margin-top:18px;display:flex;gap:10px;flex-wrap:wrap}
+.stamp{font-family:var(--mono);font-size:13px;border:1.5px solid var(--proof);color:var(--proof);border-radius:6px;padding:7px 11px;line-height:1.35;transform:rotate(-2deg)}
+@media (max-width:700px){ .top .in{grid-template-columns:minmax(0,1fr)} .stamp{justify-self:start} }
+
+.btn{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--ink);background:var(--card);color:var(--ink);border-radius:8px;padding:9px 14px;font-weight:600;cursor:pointer;text-decoration:none;font-size:15px;line-height:1.2}
+.btn:hover{background:#fff}
+.btn.primary{background:var(--crust);border-color:var(--crust);color:var(--crustInk)}
+.btn.primary:hover{background:#86400f}
+.top .btn{border-color:var(--flour);background:transparent;color:var(--flour)}
+.top .btn.primary{background:var(--proof);border-color:var(--proof);color:var(--char)}
+.btn.small{padding:5px 10px;font-size:14px}
+.btn.ghost{border-color:transparent;background:transparent;text-decoration:underline;padding-left:4px;padding-right:4px}
+.btn[disabled]{opacity:.55;cursor:default}
+
+/* ---- layout ---- */
+.wrap{max-width:1240px;margin:0 auto;padding:20px 18px 48px;display:grid;grid-template-columns:minmax(0,1fr) 520px;grid-template-areas:"form rail" "pro rail";grid-template-rows:auto 1fr;gap:26px;align-items:start}
+.formcol{grid-area:form} .rail{grid-area:rail} #proSec{grid-area:pro}
+.wrap > *{min-width:0}
+@media (max-width:1060px){ .wrap{grid-template-columns:minmax(0,1fr);grid-template-areas:"form" "rail" "pro";grid-template-rows:auto} }
+.rail{position:sticky;top:14px;max-height:calc(100vh - 28px);overflow:auto;overscroll-behavior:contain;padding:12px 4px 4px;margin:-12px -4px 0}
+.rail .actions{margin:0 0 12px}
+@media (max-width:1060px){ .rail{position:static;max-height:none;overflow:visible} .rail .actions{margin:12px 0 0;order:2} .rail{display:flex;flex-direction:column} .rail .actnote{order:3} }
+
+h2{font-family:var(--serif);font-weight:400;font-size:26px;margin:0 0 4px;line-height:1.15}
+.lead{margin:0 0 14px;color:var(--ink2)}
+.panel{background:var(--flour);border:1px solid var(--line);border-radius:14px;padding:18px;margin:0 0 18px}
+.notice{border-radius:10px;padding:10px 14px;margin:0 0 14px;background:var(--proof);color:var(--char);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.notice[hidden]{display:none}
+.notice .btn{margin-left:auto}
+
+/* ---- bread cards ---- */
+.breads{display:grid;gap:14px}
+.bread{background:var(--card);border:1px solid var(--rule);border-radius:12px;position:relative;overflow:hidden}
+.bread::before{content:"";position:absolute;left:0;top:0;bottom:0;width:8px;background:var(--c,#9C4A1A)}
+.bread .head{display:grid;grid-template-columns:minmax(0,1fr) 112px 132px auto;gap:10px;align-items:end;padding:14px 14px 10px 22px;border-bottom:1px dashed var(--line)}
+@media (max-width:620px){ .bread .head{grid-template-columns:minmax(0,1fr) minmax(0,1fr)} .bread .head .nm{grid-column:1 / -1} .bread .head .x{position:absolute;right:8px;top:8px} }
+.bread .body{padding:10px 14px 14px 22px}
+label.f{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin:0 0 4px}
+input[type=text],input[type=date],input[type=time],input[type=email],select,textarea{width:100%;border:1.5px solid var(--rule);background:#fff;border-radius:8px;padding:8px 10px;min-height:40px}
+input:focus,select:focus,textarea:focus{border-color:var(--ink);outline:none;box-shadow:0 0 0 3px rgba(31,95,191,.25)}
+.nm input{font-family:var(--serif);font-size:20px;border-color:transparent;background:transparent;padding-left:2px}
+.nm input:hover{border-color:var(--line)}
+.nm input:focus{border-color:var(--ink);background:#fff}
+.count input{font-family:var(--mono);font-weight:700;font-size:20px;text-align:right}
+.ing{width:100%;border-collapse:collapse}
+.ing td{padding:3px 4px 3px 0;vertical-align:middle}
+.ing td.a{width:110px}
+.ing td.k{width:128px}
+.ing td.d{width:34px;text-align:right}
+.ing input[inputmode]{text-align:right;font-family:var(--mono)}
+.ing input,.ing select{min-height:36px;padding:6px 8px}
+.ing tr.levain td:first-child input{background:#FFF6DF}
+@media (max-width:560px){
+  .ing,.ing tbody{display:block}
+  .ing tr{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 34px;grid-template-areas:"n n d" "a k k";gap:4px 6px;padding:6px 0;border-bottom:1px dashed var(--line)}
+  .ing td{display:block;padding:0;width:auto!important}
+  .ing td:nth-child(1){grid-area:n} .ing td.a{grid-area:a} .ing td.k{grid-area:k} .ing td.d{grid-area:d}
+}
+.iconx{border:0;background:transparent;font-size:20px;line-height:1;cursor:pointer;color:var(--ink2);padding:6px;border-radius:6px}
+.iconx:hover{background:var(--warnBg);color:var(--warn)}
+.bfoot{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;margin-top:8px;font-size:14px}
+.bfoot .stat{font-family:var(--mono);color:var(--ink)}
+.bfoot .grow{flex:1}
+.err{background:var(--warnBg);color:var(--warn);border-radius:8px;padding:7px 10px;margin:8px 0 0;font-size:14px;font-weight:600}
+.addbread{margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 14px;align-items:end}
+.grid > *{min-width:0}
+@supports (grid-template-rows:subgrid){
+  .grid{align-items:stretch}
+  .grid > div{display:grid;grid-row:span 3;grid-template-rows:subgrid;row-gap:0}
+  .grid > div > label.f{align-self:end}
+  .grid > div > .hint{align-self:start}
+}
+@media (max-width:700px){ .grid{grid-template-columns:repeat(2,minmax(0,1fr))} }
+.hint{font-size:13px;color:var(--ink2);margin:4px 0 0}
+.chk{display:flex;gap:8px;align-items:center;font-weight:600;font-size:15px;min-height:40px}
+.chk input{width:20px;height:20px;accent-color:var(--crust)}
+.ratio{display:flex;gap:6px;align-items:center}
+.ratio input{text-align:center;font-family:var(--mono);padding:6px 2px;min-width:0}
+.ratio span{font-weight:700}
+.sub{font-family:var(--serif);font-size:19px;margin:16px 0 8px}
+.sub:first-child{margin-top:0}
+
+/* ---- the sheet (clipboard) ---- */
+.board{background:#7A5A3A;border-radius:16px;padding:30px 12px 12px;position:relative;box-shadow:0 10px 30px rgba(36,23,14,.25)}
+.board::before{content:"";position:absolute;top:-10px;left:50%;transform:translateX(-50%);width:130px;height:34px;border-radius:8px 8px 14px 14px;background:linear-gradient(#cfd3d6,#8d9396);box-shadow:inset 0 -3px 0 rgba(0,0,0,.2)}
+.sheet{background:#fff;color:#1b120a;border-radius:4px;padding:18px 18px 14px;font-size:14px;line-height:1.4}
+.sheet h3{font-family:var(--serif);font-weight:400;font-size:24px;margin:0;line-height:1.1}
+.sheet .meta{font-family:var(--mono);font-size:12.5px;margin:6px 0 0;display:flex;flex-wrap:wrap;gap:4px 14px}
+.sheet h4{font-family:var(--sans);font-weight:700;font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;margin:16px 0 6px;padding-bottom:3px;border-bottom:2px solid #1b120a;display:flex;justify-content:space-between;gap:8px}
+.sheet h4 small{font-weight:500;letter-spacing:0;text-transform:none;font-family:var(--mono);font-size:12px}
+.sheet table{width:100%;border-collapse:collapse}
+.sheet td,.sheet th{padding:3px 4px;border-bottom:1px solid #e4dccd;vertical-align:top;text-align:left}
+.sheet th{font-size:11.5px;font-weight:700;color:#3a2a1c}
+.sheet td.r,.sheet th.r{text-align:right}
+.sheet .g{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.box{display:inline-block;width:12px;height:12px;border:1.5px solid #1b120a;border-radius:2px;vertical-align:-1px}
+.clock{width:100%}
+.clock td{padding:5px 4px}
+.clock .t{font-family:var(--mono);font-weight:700;font-size:15px;white-space:nowrap;width:1%}
+.clock .dy{font-family:var(--mono);font-size:12px;white-space:nowrap;width:1%;color:#3a2a1c}
+.clock tr.daybreak td{border-top:2px solid #1b120a}
+.clock .what b{font-weight:700}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--c);margin-right:5px;vertical-align:0}
+.levbox{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:4px 0 4px}
+.levbox div{border:1.5px solid #1b120a;border-radius:6px;padding:5px 6px;text-align:center}
+.levbox b{display:block;font-family:var(--mono);font-size:17px}
+.levbox span{font-size:11.5px}
+.levbox .tot{background:#1b120a;color:#fff}
+@media (max-width:520px){ .levbox{grid-template-columns:repeat(2,minmax(0,1fr))} }
+.batch{border:1px solid #d8cdb8;border-left:6px solid var(--c);border-radius:4px;padding:6px 8px;margin:0 0 6px;break-inside:avoid}
+.batch .bt{display:flex;justify-content:space-between;gap:8px;font-weight:700}
+.batch .bt .g{font-weight:500}
+.batch table td{border:0;padding:1px 4px}
+.batch .mx{font-family:var(--mono);font-size:11.5px;margin:1px 0 3px;color:#3a2a1c}
+@media (max-width:420px){ .board{padding:26px 6px 6px} .sheet{padding:14px 10px 12px} }
+.load{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 10px;align-items:center;padding:4px 0;border-bottom:1px solid #e4dccd}
+.load .lt{font-family:var(--mono);font-weight:700;white-space:nowrap}
+.loaves{display:flex;flex-wrap:wrap;gap:3px;margin-top:2px}
+.loaves i{width:13px;height:13px;border-radius:50%;background:var(--c);display:inline-block;border:1px solid rgba(0,0,0,.25)}
+.loaves i.h{border-radius:7px 2px 2px 7px;width:8px}
+.credit{font-size:11px;margin-top:12px;padding-top:6px;border-top:1px dashed #bbb;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.empty{padding:28px 10px;text-align:center;color:#3a2a1c}
+.empty b{display:block;font-family:var(--serif);font-weight:400;font-size:21px;margin-bottom:6px;color:#1b120a}
+.warnline{background:#FBE7D3;color:#6e2c0b;border-radius:4px;padding:5px 8px;margin:6px 0 0;font-size:12.5px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 0}
+.actnote{font-size:14px;margin:0 0 8px;min-height:0}
+.actnote:empty{display:none}
+
+/* ---- sticky bar (phone) ---- */
+.bar{position:fixed;left:0;right:0;bottom:0;background:var(--char);color:var(--flour);padding:9px 14px calc(9px + env(safe-area-inset-bottom));display:none;gap:10px;align-items:center;z-index:5;font-size:14px}
+.bar b{font-family:var(--mono);color:var(--proof)}
+.bar a{margin-left:auto;color:var(--char);background:var(--proof);border-radius:7px;padding:7px 11px;font-weight:700;text-decoration:none;white-space:nowrap}
+@media (max-width:1060px){ .bar.on{display:flex} body{padding-bottom:64px} }
+
+/* ---- pro ---- */
+.pro{background:var(--card);border:2px solid var(--char);border-radius:14px;padding:18px}
+.pro ul{margin:8px 0 12px;padding-left:20px}
+.pro li{margin:3px 0}
+.pro .price{font-family:var(--mono);font-size:22px;font-weight:700}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:end}
+.row > div{flex:1;min-width:200px}
+.days{display:grid;gap:6px;margin:8px 0}
+.days .d{display:flex;gap:8px;align-items:center;flex-wrap:wrap;border:1px solid var(--line);border-radius:8px;padding:6px 10px;background:#fff}
+.days .d b{flex:1;min-width:140px}
+.prolock{opacity:.6}
+textarea{min-height:110px;font-family:var(--mono);font-size:14px}
+
+footer{max-width:1240px;margin:0 auto;padding:10px 18px 40px;font-size:14px;color:var(--ink2)}
+footer a{color:var(--ink)}
+.toast{position:fixed;left:50%;bottom:80px;transform:translateX(-50%);background:var(--char);color:#fff;border-radius:8px;padding:8px 14px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9}
+.toast.on{opacity:1}
+
+@media print{
+  @page{margin:12mm}
+  .rail{max-height:none!important;overflow:visible!important;margin:0;padding:0}
+  body{background:#fff}
+  .top,.formcol,.bar,footer,.actions,.actnote,.pro,.toast,.notice{display:none!important}
+  .wrap{display:block;padding:0;max-width:none}
+  .rail{position:static}
+  .board{background:none;box-shadow:none;padding:0}
+  .board::before{display:none}
+  .sheet{padding:0;font-size:11.5px;line-height:1.3}
+  .sheet h3{font-size:20px} .sheet h4{margin:10px 0 4px}
+  .clock td{padding:2px 4px} .clock .t{font-size:13px}
+  .mixes{columns:2;column-gap:10px}
+  .sheet h4{break-after:avoid}
+  .batch{padding:4px 6px;margin:0 0 5px}
+  .levbox b{font-size:14px} .levbox div{padding:3px}
+  .load{padding:2px 0} .loaves i{width:10px;height:10px}
+  .batch,.load,.clock tr{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<header class="top"><div class="in">
+  <div>
+    <h1>This week's orders in.<br><span>Bake-day sheet out.</span></h1>
+    <p>A free production planner for micro bakeries. Put in your breads once and how many of each you're baking. Get the dough for every mix, one levain build for all of it, and a clock schedule worked back from when the last loaf leaves the oven. Print it for the wall by the oven.</p>
+    <div class="cta"><button class="btn primary" type="button" id="btnHeroExample">See it with an example bakery</button><a class="btn" href="#breadsSec">Start with my breads</a></div>
+  </div>
+  <div class="stamp">Free · no sign-up<br>saved on this device only</div>
+</div></header>
+
+<main class="wrap">
+<div class="formcol">
+  <div class="notice" id="exNote" hidden><span>These are example breads and numbers. Change anything; it's saved on this device.</span><button class="btn small" type="button" id="btnClear">Clear and start mine</button></div>
+
+  <section class="panel" id="breadsSec" aria-labelledby="hBreads">
+    <h2 id="hBreads">1. Your breads and how many</h2>
+    <p class="lead">Type each recipe as one batch in grams, or as baker's percentages. Only the ratios are used, so either works. Mark the line that is your levain.</p>
+    <div class="breads" id="breads"></div>
+    <div class="addbread"><button class="btn" type="button" id="btnAddBread">+ Add a bread</button><span class="hint" id="breadLimitNote"></span></div>
+    <div class="grid" style="margin-top:14px">
+      <div><label class="f" for="waste">Dough lost to bowls &amp; scaling (%)</label><input type="text" id="waste" inputmode="decimal" min="0" step="0.5"></div>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="hLev">
+    <h2 id="hLev">2. Levain</h2>
+    <p class="lead">One build for every bread that uses it. Give a levain line a different name in a recipe (say “Rye sour”) and it gets its own build here.</p>
+    <div id="levs"></div>
+  </section>
+
+  <section class="panel" aria-labelledby="hDay">
+    <h2 id="hDay">3. Bake day and your kit</h2>
+    <p class="lead">Everything is worked back from the time the last loaf comes out.</p>
+    <p class="sub">When</p>
+    <div class="grid">
+      <div><label class="f" for="dDate">Bake day</label><input type="date" id="dDate"></div>
+      <div><label class="f" for="dReady">Last loaf out of the oven by</label><input type="time" id="dReady"></div>
+      <div><label class="f" for="dClock">Clock</label><select id="dClock"><option value="12">12-hour (7:30 AM)</option><option value="24">24-hour (07:30)</option></select></div>
+    </div>
+    <p class="sub">Mixer and oven</p>
+    <div class="grid">
+      <div><label class="f" for="mCap">Mixer holds (kg of dough)</label><input type="text" id="mCap" inputmode="decimal" min="0" step="0.5"><p class="hint">Leave empty to mix each bread in one go.</p></div>
+      <div><label class="f" for="mMin">Minutes per mix</label><input type="text" id="mMin" inputmode="numeric" min="0" step="5"><p class="hint">Include autolyse if you do one.</p></div>
+      <div><label class="f" for="oCap">Loaves per oven load</label><input type="text" id="oCap" inputmode="numeric" min="0" step="1"></div>
+      <div><label class="f" for="oMin">Minutes per load (bake + reload)</label><input type="text" id="oMin" inputmode="numeric" min="0" step="5"></div>
+      <div><label class="f" for="oPre">Oven preheat (minutes)</label><input type="text" id="oPre" inputmode="numeric" min="0" step="5"></div>
+    </div>
+    <p class="sub">Dough timing</p>
+    <div class="grid">
+      <div><label class="f" for="bulkH">Bulk ferment (hours)</label><input type="text" id="bulkH" inputmode="decimal" min="0" step="0.25"></div>
+      <div><label class="f" for="shapeM">Divide &amp; shape (minutes per loaf)</label><input type="text" id="shapeM" inputmode="decimal" min="0" step="0.5"></div>
+      <div><label class="f" for="restM">Bench rest after pre-shape (minutes)</label><input type="text" id="restM" inputmode="numeric" min="0" step="5"></div>
+      <div><label class="chk"><input type="checkbox" id="retard"> Cold retard overnight</label></div>
+      <div><label class="f" for="retH" id="retLbl">Fridge time before first load (hours)</label><input type="text" id="retH" inputmode="decimal" min="0" step="0.5"></div>
+    </div>
+  </section>
+
+</div>
+
+<aside class="rail" id="sheetSec" aria-label="Production sheet">
+  <div class="actions">
+    <button class="btn primary" type="button" id="btnPrint">Print the sheet</button>
+    <button class="btn" type="button" id="btnCopy">Copy as text</button>
+  </div>
+  <p class="actnote" id="actNote" aria-live="polite"></p>
+  <div class="board"><div class="sheet" id="sheet"></div></div>
+</aside>
+
+<section class="pro" id="proSec" aria-labelledby="hPro"></section>
+</main>
+
+<div class="bar" id="bar"><span id="barTxt"></span><a href="#sheetSec">Sheet ↓</a></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<footer>
+  <p>Bake Day works out the numbers from what you type. Check the sheet against your own recipe the first time you use it. Nothing you type leaves this device. Made by Sam at <a href="https://samsbench.com/?via=bd-footer">Sam's Bench</a>.</p>
+</footer>
+
+<script>
+(function(){
+'use strict';
+var $ = function(id){ return document.getElementById(id); };
+var KEY = 'bd.v1', PROKEY = 'bd.pro', DAYSKEY = 'bd.days';
+var FREE_BREADS = 3;
+var COLORS = ['#B5532A','#2F5D7C','#6E7F2E','#8A3B6E','#C08A1E','#3E6B5C','#7A4A2A','#5B5B9A','#B23A48','#4A7A8C'];
+var KINDS = [['flour','Flour'],['water','Water'],['levain','Levain'],['salt','Salt'],['other','Other']];
+
+/* ---------- state ---------- */
+function nextSat(){ var d = new Date(); d.setHours(12,0,0,0); var add = (6 - d.getDay() + 7) % 7 || 7; d.setDate(d.getDate() + add); return isoDate(d); }
+function isoDate(d){ return d.getFullYear() + '-' + ('0'+(d.getMonth()+1)).slice(-2) + '-' + ('0'+d.getDate()).slice(-2); }
+function defClock(){ try{ var l = (navigator.language || '').toLowerCase(); return (l === 'en-us' || l === 'en-ca' || l === 'en-au' || l === 'en-ph' || l === 'en-in') ? '12' : '24'; }catch(e){ return '24'; } }
+function blankBread(n){
+  return {id: 'b' + Math.random().toString(36).slice(2,8), name: n || '', portion: 900, count: 0, ing: [
+    {n:'Bread flour', a:'', k:'flour'}, {n:'Water', a:'', k:'water'}, {n:'Levain', a:'', k:'levain'}, {n:'Salt', a:'', k:'salt'}]};
+}
+function blank(){
+  return {v:1, example:false, breads:[blankBread('')], waste:2,
+    lev:{s:1, f:5, w:5, keep:50, hours:10, flour:'Bread flour', have:''}, levx:{},
+    day:{date: nextSat(), ready:'08:00', clock: defClock(), mCap:'', mMin:20, oCap:6, oMin:45, oPre:60, bulkH:5, shapeM:1.5, restM:20, retard:true, retH:12}};
+}
+function example(){
+  var s = blank(); s.example = true;
+  s.breads = [
+    {id:'bx1', name:'Country loaf', portion:900, count:12, ing:[{n:'Bread flour',a:850,k:'flour'},{n:'Whole wheat flour',a:150,k:'flour'},{n:'Water',a:780,k:'water'},{n:'Levain',a:200,k:'levain'},{n:'Salt',a:22,k:'salt'}]},
+    {id:'bx2', name:'Seeded', portion:950, count:8, ing:[{n:'Bread flour',a:800,k:'flour'},{n:'Whole wheat flour',a:200,k:'flour'},{n:'Water',a:800,k:'water'},{n:'Levain',a:200,k:'levain'},{n:'Salt',a:22,k:'salt'},{n:'Seed mix (soaked)',a:150,k:'other'}]},
+    {id:'bx3', name:'Olive & rosemary', portion:900, count:6, ing:[{n:'Bread flour',a:1000,k:'flour'},{n:'Water',a:720,k:'water'},{n:'Levain',a:200,k:'levain'},{n:'Salt',a:22,k:'salt'},{n:'Olives',a:200,k:'other'}]}
+  ];
+  s.day.mCap = 8; s.day.mMin = 25; s.day.oCap = 8; s.day.oMin = 45; s.day.oPre = 60; s.day.bulkH = 5; s.day.shapeM = 1.5; s.day.restM = 20; s.day.retard = true; s.day.retH = 12; s.day.ready = '08:00';
+  return s;
+}
+var S = blank();
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
+function load(){
+  try{ var t = localStorage.getItem(KEY); if(!t) return false; var o = JSON.parse(t); if(!o || o.v !== 1 || !Array.isArray(o.breads)) return false;
+    var b = blank(); o.lev = Object.assign(b.lev, o.lev || {}); o.day = Object.assign(b.day, o.day || {}); S = Object.assign(b, o); if(!S.levx || typeof S.levx !== 'object') S.levx = {};
+    S.breads = S.breads.filter(function(x){ return x && Array.isArray(x.ing); }); if(!S.breads.length) S.breads = [blankBread('')];
+    return true; }catch(e){ return false; }
+}
+
+/* ---------- numbers ---------- */
+/* Typed numbers: "5,5" is 5.5 (comma decimals); "1,000" and "12,500" are thousands. */
+function num(v){
+  var t = String(v == null ? '' : v).trim().replace(/\s+/g, '');
+  if(/^-?\d{1,3}(,\d{3})+(\.\d+)?$/.test(t)) t = t.replace(/,/g, ''); else t = t.replace(',', '.');
+  var x = parseFloat(t); return isFinite(x) ? x : 0;
+}
+function pos(v){ var x = num(v); return x > 0 ? x : 0; }
+
+function levKey(name){ return String(name || '').trim().toLowerCase().replace(/\s+/g, ' ') || 'levain'; }
+function levSettings(st, key){ var d = st.lev || {}; var o = (st.levx || {})[key]; return o ? Object.assign({}, d, o) : d; }
+
+/* The whole plan from the state. Pure: same input, same output. Exposed as window.__bd.plan for tests. */
+function plan(st){
+  var P = {breads: [], errors: [], notes: [], batches: [], loads: [], steps: [], pull: [], levs: [], lev: null, ok: false};
+  var waste = pos(st.waste) / 100;
+  /* Each differently named levain line ("Levain", "Rye sour") is its own build with its own feed. */
+  var LV = {}, lvOrder = [];
+  function levOf(name){
+    var key = levKey(name);
+    if(!LV[key]){
+      var L = levSettings(st, key), ls = pos(L.s), lf = pos(L.f), lw = pos(L.w);
+      LV[key] = {key: key, name: (name || '').trim() || 'Levain', L: L, ls: ls, lf: lf, lw: lw, hyd: lf > 0 ? lw / lf : 1, use: 0, per: []};   // seed starter assumed at the feed's hydration
+      lvOrder.push(key);
+    }
+    return LV[key];
+  }
+  var pieces = 0, doughTotal = 0;
+  (st.breads || []).forEach(function(b, i){
+    var r = {id: b.id, i: i, name: (b.name || '').trim() || ('Bread ' + (i + 1)), color: COLORS[i % COLORS.length], count: Math.max(0, Math.round(num(b.count))), portion: pos(b.portion), lines: [], err: ''};
+    var batch = 0, flourR = 0, waterR = 0, levR = 0, levFlourR = 0;
+    (b.ing || []).forEach(function(g){ var a = pos(g.a); batch += a; if(g.k === 'flour') flourR += a; if(g.k === 'water') waterR += a;
+      if(g.k === 'levain' && a > 0){ levR += a; levFlourR += a / (1 + levOf(g.n).hyd); } });
+    r.batch = batch;
+    var levWaterR = levR - levFlourR;
+    r.hyd = (flourR + levFlourR) > 0 ? (waterR + levWaterR) / (flourR + levFlourR) * 100 : null;
+    r.levPct = flourR > 0 ? levR / flourR * 100 : null;
+    if(num(b.count) < 0 || num(b.portion) < 0 || (b.ing || []).some(function(g){ return num(g.a) < 0; })) r.err = 'A number here is below zero. Amounts and counts can\'t be negative.';
+    else if(r.count > 0){
+      if(!(batch > 0)) r.err = 'Type the amounts for this recipe.';
+      else if(!(r.portion > 0)) r.err = 'How much dough goes into one loaf?';
+    }
+    r.need = (r.count > 0 && !r.err) ? r.count * r.portion * (1 + waste) : 0;
+    var sc = r.need > 0 ? r.need / batch : 0;
+    r.levain = 0;
+    (b.ing || []).forEach(function(g){ var a = pos(g.a); if(!(a > 0)) return;
+      var nm = (g.n || '').trim() || KINDS.filter(function(k){ return k[0] === g.k; })[0][1];
+      r.lines.push({n: nm, k: g.k, g: a * sc});
+      if(g.k === 'levain' && sc > 0){ var lv = levOf(g.n); lv.use += a * sc; lv.per.push({name: r.name, color: r.color, g: a * sc}); r.levain += a * sc; } });
+    doughTotal += r.need; if(r.need > 0) pieces += r.count;
+    if(r.err) P.errors.push(r.name + ': ' + r.err);
+    P.breads.push(r);
+  });
+  var live = P.breads.filter(function(r){ return r.need > 0; });
+  P.pieces = pieces; P.dough = doughTotal;
+  if(!live.length){ return P; }
+
+  /* levain builds */
+  lvOrder.forEach(function(key){
+    var lv = LV[key]; if(!(lv.use > 0)) return;
+    if(!(lv.lf > 0) || !(lv.ls > 0)){ P.errors.push(lv.name + ': the feed ratio needs starter and flour parts above 0.'); }
+    var keep = pos(lv.L.keep), build = lv.use + keep, parts = lv.ls + lv.lf + lv.lw || 1;
+    P.levs.push({key: key, name: lv.name, use: lv.use, keep: keep, total: build, seed: build * lv.ls / parts, flour: build * lv.lf / parts, water: build * lv.lw / parts,
+      hours: pos(lv.L.hours), have: pos(lv.L.have), flourName: (lv.L.flour || '').trim() || 'Flour', per: lv.per});
+  });
+  P.lev = P.levs[0] || null;
+
+  /* mixes: each bread mixes on its own; a bread bigger than the mixer is split into mixes of whole loaves */
+  var D = st.day || {}, cap = pos(D.mCap) * 1000;
+  live.forEach(function(r){
+    var per = r.portion * (1 + waste), c = r.count, n = 1;
+    if(cap > 0){
+      if(per > cap + 1e-6){ n = c; P.errors.push(r.name + ': one loaf of dough (' + fmtG(per) + ') is more than your mixer holds.'); }
+      else { n = Math.max(1, Math.ceil(r.need / cap - 1e-9)); while(Math.ceil(c / n) * per > cap + 1e-6) n++; }
+    }
+    r.mixes = n;
+    var base = Math.floor(c / n), extra = c % n;
+    for(var k = 0; k < n; k++){
+      var ck = base + (k < extra ? 1 : 0); if(!ck) continue;
+      var f = ck / c;
+      P.batches.push({bread: r, k: k + 1, n: n, loaves: ck, g: r.need * f, lines: r.lines.map(function(l){ return {n: l.n, k: l.k, g: l.g * f}; })});
+    }
+  });
+  if(P.batches.length > 8) P.notes.push(P.batches.length + ' separate mixes. A bigger mixer setting, or fewer splits, would shorten the day.');
+
+  /* forward from the first mix (t = 0): each mix bulks, then is shaped as soon as the bench is free, rests, then goes cold */
+  var mMin = pos(D.mMin), bulk = pos(D.bulkH) * 60, shapeM = pos(D.shapeM), rest = pos(D.restM), ret = pos(D.retH) * 60;
+  var benchFree = -Infinity;
+  P.batches.forEach(function(m, i){
+    m.start = i * mMin; m.end = m.start + mMin;
+    m.shapeStart = Math.max(m.end + bulk, benchFree);
+    m.shapeEnd = m.shapeStart + m.loaves * shapeM; benchFree = m.shapeEnd;
+    m.cold = m.shapeEnd + rest;
+  });
+
+  /* oven loads, filled in mix order; anchored to the time the last loaf comes out */
+  var oCap = Math.floor(pos(D.oCap));
+  var rt = String(D.ready || '').split(':'), ready = (parseInt(rt[0], 10) || 0) * 60 + (parseInt(rt[1], 10) || 0);
+  if(!/^\d{1,2}:\d{2}/.test(String(D.ready || ''))) P.errors.push('When should the last loaf be out of the oven?');
+  var oMin = pos(D.oMin), pre = pos(D.oPre);
+  if(!(oCap > 0)){ P.errors.push('How many loaves fit in one oven load?'); }
+  else {
+    var cur = null;
+    P.batches.forEach(function(m){
+      var left = m.loaves;
+      while(left > 0){
+        if(!cur || cur.n >= oCap){ cur = {items: [], parts: [], n: 0}; P.loads.push(cur); }
+        var take = Math.min(left, oCap - cur.n);
+        cur.parts.push({mix: m, n: take});
+        var last = cur.items[cur.items.length - 1];
+        if(last && last.bread === m.bread) last.n += take; else cur.items.push({bread: m.bread, n: take});
+        cur.n += take; left -= take;
+      }
+    });
+  }
+  var nLoads = P.loads.length, firstLoad = ready - nLoads * oMin;
+  P.loads.forEach(function(ld, i){ ld.start = firstLoad + i * oMin; ld.end = ld.start + oMin; });
+
+  /* shift: the earliest-baked loaf of every mix must get at least the fridge (or proof) time */
+  var shift = Infinity;
+  P.loads.forEach(function(ld){ ld.parts.forEach(function(pt){ shift = Math.min(shift, ld.start - pt.mix.cold - ret); }); });
+  if(!isFinite(shift)) shift = firstLoad - ret - (P.batches.length ? P.batches[P.batches.length - 1].cold : 0);
+  P.batches.forEach(function(m){ ['start', 'end', 'shapeStart', 'shapeEnd', 'cold'].forEach(function(k){ m[k] += shift; }); });
+  var mixStart = P.batches.length ? P.batches[0].start : firstLoad;
+  var longest = 0;
+  P.loads.forEach(function(ld){ ld.parts.forEach(function(pt){ longest = Math.max(longest, ld.start - pt.mix.cold); }); });
+
+  var steps = [];
+  P.levs.forEach(function(lv){
+    lv.feed = mixStart - lv.hours * 60;
+    steps.push({t: lv.feed, what: 'Feed the ' + lv.name.toLowerCase(), detail: fmtG(lv.seed) + ' ripe starter + ' + fmtG(lv.flour) + ' ' + lv.flourName + ' + ' + fmtG(lv.water) + ' water'});
+  });
+  var feed = P.levs.length ? Math.min.apply(null, P.levs.map(function(lv){ return lv.feed; })) : mixStart;
+  P.batches.forEach(function(m, i){
+    m.no = i + 1;
+    var nm = m.bread.name + (m.n > 1 ? ' (' + m.k + ' of ' + m.n + ')' : '');
+    steps.push({t: m.start, what: 'Mix ' + m.no + ': ' + nm, detail: fmtG(m.g) + ', then bulk ' + fmtDur(bulk), mix: m});
+    steps.push({t: m.shapeStart, what: 'Shape mix ' + m.no + ': ' + nm, detail: plural(m.loaves, 'loaf', 'loaves') + (rest ? ', rest ' + fmtDur(rest) : '') + (D.retard ? ', into the fridge ' : ', final proof from ') + clockOf(m.cold), mix: m});
+  });
+  if(nLoads) steps.push({t: firstLoad - pre, what: 'Preheat the oven', detail: pre ? fmtDur(pre) : ''});
+  P.loads.forEach(function(ld, i){ steps.push({t: ld.start, what: 'Load ' + (i + 1) + ' in', detail: ld.items.map(function(it){ return it.bread.name + ' ×' + it.n; }).join(', '), load: i}); });
+  if(nLoads) steps.push({t: ready, what: 'Last loaf out', detail: plural(pieces, 'loaf', 'loaves') + ' done'});
+  steps.sort(function(a, b){ return a.t - b.t; });
+  P.steps = steps;
+  P.feed = feed; P.mixStart = mixStart; P.firstLoad = firstLoad; P.ready = ready; P.longest = longest;
+
+  /* things a baker should hear about before the night */
+  if(nLoads && longest > ret + 30) P.notes.push('Longest ' + (D.retard ? 'in the fridge' : 'final proof') + ': ' + fmtDur(longest) + ' (the shortest is ' + fmtDur(ret) + ').');
+  if(!D.retard && ret > 240) P.errors.push('A ' + fmtDur(ret) + ' final proof at room temperature is long for sourdough. Tick cold retard, or shorten it.');
+  if(!D.retard && longest > ret + 60) P.notes.push('Without a cold retard, some loaves wait ' + fmtDur(longest - ret) + ' longer than others. Keep them cool if you can.');
+  var lastMixEnd = P.batches.length ? P.batches[P.batches.length - 1].end : 0;
+  if(P.batches.length && lastMixEnd > P.batches[0].shapeStart + 1) P.notes.push('Mixing and shaping overlap from ' + clockOf(P.batches[0].shapeStart) + ' to ' + clockOf(lastMixEnd) + '. You need a second pair of hands, or a longer bulk.');
+  P.levs.forEach(function(lv){
+    var tod = ((lv.feed % 1440) + 1440) % 1440;
+    if(tod >= 23 * 60 || tod < 5 * 60) P.notes.push(lv.name + ' gets fed at ' + clockOf(lv.feed) + '. For a kinder hour, feed at a bigger ratio (say 1:10:10) and set a longer “hours until ripe”.');
+    if(!(lv.hours > 0)) P.errors.push(lv.name + ': how many hours until it is ripe?');
+    if(lv.have > 0 && lv.seed > lv.have) P.notes.push('You need ' + fmtG(lv.seed) + ' of ripe starter for the ' + lv.name.toLowerCase() + ' and have ' + fmtG(lv.have) + '. Feed your starter up the day before: ' + fmtG(lv.seed / 3 + 5) + ' each of starter, flour and water.');
+  });
+
+  /* pull list: everything to weigh out, summed by ingredient name (levain counted as its flour and water) */
+  var pull = {}, order = [];
+  function add(name, kind, g){ var k = name.toLowerCase(); if(!pull[k]){ pull[k] = {n: name, k: kind, g: 0}; order.push(k); } pull[k].g += g; }
+  P.levs.forEach(function(lv){ add(lv.flourName, 'flour', lv.flour); add('Water', 'water', lv.water); });
+  live.forEach(function(r){ r.lines.forEach(function(l){ if(l.k !== 'levain') add(l.n, l.k, l.g); }); });
+  var rank = {flour: 0, water: 1, salt: 2, other: 3};
+  P.pull = order.map(function(k){ return pull[k]; }).sort(function(a, b){ return (rank[a.k] || 0) - (rank[b.k] || 0); });
+  P.ok = !P.errors.length;
+  return P;
+}
+
+/* ---------- formatting ---------- */
+function fmtG(g){ if(!(g > 0)) return '0 g'; return Math.round(g).toLocaleString('en-US') + ' g'; }
+function plural(n, one, many){ return n + ' ' + (n === 1 ? one : many); }
+function fmtKg(g){ return (g / 1000).toFixed(g >= 100000 ? 0 : 1) + ' kg'; }
+function fmtDur(m){ m = Math.round(m); if(m < 60) return m + ' min'; var h = Math.floor(m / 60), r = m % 60; return h + ' h' + (r ? ' ' + r + ' min' : ''); }
+var DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+function dayOf(min){ return Math.floor(min / 1440); }
+function dayLabel(min){
+  var off = dayOf(min);
+  var d = S.day.date ? new Date(S.day.date + 'T12:00:00') : null;
+  if(d && !isNaN(d)){ d.setDate(d.getDate() + off); return DOW[d.getDay()] + ' ' + d.getDate(); }
+  return off === 0 ? 'Bake day' : off === -1 ? 'Day before' : (-off) + ' days before';
+}
+function clockOf(min){
+  var m = ((Math.floor(min / 5) * 5) % 1440 + 1440) % 1440;   // rounded down to 5 min: earlier is the safe side
+  var h = Math.floor(m / 60), mm = ('0' + (m % 60)).slice(-2);
+  if(S.day.clock === '12'){ var ap = h < 12 ? 'AM' : 'PM', h12 = h % 12 || 12; return h12 + ':' + mm + ' ' + ap; }
+  return ('0' + h).slice(-2) + ':' + mm;
+}
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function fullDate(){ var d = S.day.date ? new Date(S.day.date + 'T12:00:00') : null; if(!d || isNaN(d)) return 'Bake day'; return d.toLocaleDateString('en-US', {weekday:'long', month:'short', day:'numeric'}); }
+
+/* ---------- Pro ---------- */
+var SITE = 'https://samsbench.com/bake-day/';
+var CHECKOUT_PLAN = 'plan_4UWn6QT2V6tgT';   // Whop product prod_i9tUzrJ4KPRzy, $9 one-time (user 11-24 选择题); ?a=<affiliate> goes to this plan link
+var CHECKOUT_REDIRECT = 'https://whop.com/checkout/ch_5usvOkfwFnMp2Gl/';   // same plan, returns buyers to SITE?bought=1#proSec
+var VERIFY_URL = 'https://app-bizz-api.whop.site/api/verify';
+var APP_KEY = 'bake-day';
+var PRICE = '$9';
+/* Gift codes for the people we write to: only SHA-256 fingerprints live here; the codes are in outreach/gift_codes.csv (not published). */
+var GIFT_SHA256 = [];
+var PRO = {key: '', kind: ''};
+function loadPro(){ try{ var t = localStorage.getItem(PROKEY); if(t) PRO = Object.assign(PRO, JSON.parse(t)); }catch(e){} }
+function savePro(){ try{ localStorage.setItem(PROKEY, JSON.stringify(PRO)); }catch(e){} }
+function isPro(){ return !!PRO.key; }
+function affCode(){
+  var a = ''; try{ a = new URLSearchParams(location.search).get('a') || ''; }catch(e){}
+  a = a.replace(/[^A-Za-z0-9_-]/g, '').slice(0, 40);
+  try{ if(a) localStorage.setItem('bd.aff', a); else a = localStorage.getItem('bd.aff') || ''; }catch(e){}
+  return a;
+}
+function buyUrl(){ var a = affCode(); if(!CHECKOUT_PLAN) return ''; return a ? 'https://whop.com/checkout/' + CHECKOUT_PLAN + '?a=' + encodeURIComponent(a) : (CHECKOUT_REDIRECT || 'https://whop.com/checkout/' + CHECKOUT_PLAN); }
+function checkGift(code){
+  var c = String(code || '').toUpperCase().replace(/\s+/g, '');
+  if(!window.crypto || !crypto.subtle) return Promise.resolve(false);
+  return crypto.subtle.digest('SHA-256', new TextEncoder().encode(c)).then(function(buf){
+    var hex = Array.prototype.map.call(new Uint8Array(buf), function(b){ return ('0' + b.toString(16)).slice(-2); }).join('');
+    return GIFT_SHA256.indexOf(hex) >= 0;
+  });
+}
+function verifyLicense(email){
+  return fetch(VERIFY_URL, {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify({app: APP_KEY, email: email})})
+    .then(function(r){ return r.json(); }).then(function(j){ if(j && j.ok) return j; throw new Error('check failed'); });
+}
+
+/* ---------- measurement (GoatCounter) ----------
+   SRC = this visit's ?via= (or "aff" for an affiliate link), kept for the tab; funnel events are sent twice:
+   plain ("buy-click") and with the source ("buy-click.wl3"), so every channel can be followed down to the buy button. */
+var GC_CODE = 'bakeday';
+var SRC = (function(){ try{
+  var q = new URLSearchParams(location.search), v = (q.get('via') || '').replace(/[^a-z0-9-]/g, '').slice(0, 20) || (q.get('a') ? 'aff' : '');
+  if(v){ sessionStorage.setItem('bd.src', v); return v; }
+  return sessionStorage.getItem('bd.src') || '';
+}catch(e){ return ''; } })();
+var FUNNEL_EV = {'example':1, 'tool-start':1, 'sheet-ready':1, 'export-print':1, 'export-copy':1, 'limit-hit':1, 'pro-view':1, 'buy-click':1, 'pro-unlocked':1, 'pro-unlocked-gift':1, 'paste-orders':1, 'save-day':1};
+var ONCE = {};
+function track(name, tries){
+  try{
+    if(!tries && SRC && FUNNEL_EV[name]) track(name + '.' + SRC);
+    if(window.goatcounter && window.goatcounter.count) window.goatcounter.count({path: name, title: name, event: true});
+    else if((tries || 0) < 20) setTimeout(function(){ track(name, (tries || 0) + 1); }, 500);
+  }catch(e){}
+}
+function trackOnce(name){ if(ONCE[name]) return; ONCE[name] = 1; try{ if(sessionStorage.getItem('bd.once.' + name)) return; sessionStorage.setItem('bd.once.' + name, '1'); }catch(e){} track(name); }
+
+/* ---------- render: bread cards ---------- */
+function breadCard(b, i){
+  var c = COLORS[i % COLORS.length];
+  var rows = b.ing.map(function(g, j){
+    var opts = KINDS.map(function(k){ return '<option value="' + k[0] + '"' + (g.k === k[0] ? ' selected' : '') + '>' + k[1] + '</option>'; }).join('');
+    return '<tr class="' + (g.k === 'levain' ? 'levain' : '') + '"><td><input type="text" data-b="' + i + '" data-g="' + j + '" data-f="n" value="' + esc(g.n) + '" aria-label="Ingredient name" maxlength="40"></td>'
+      + '<td class="a"><input type="text" inputmode="decimal" min="0" step="any" data-b="' + i + '" data-g="' + j + '" data-f="a" value="' + esc(g.a) + '" aria-label="' + esc(g.n || 'Ingredient') + ' amount"></td>'
+      + '<td class="k"><select data-b="' + i + '" data-g="' + j + '" data-f="k" aria-label="' + esc(g.n || 'Ingredient') + ' is">' + opts + '</select></td>'
+      + '<td class="d"><button class="iconx" type="button" data-delg="' + i + ':' + j + '" aria-label="Remove ' + esc(g.n || 'ingredient') + '">×</button></td></tr>';
+  }).join('');
+  return '<article class="bread" style="--c:' + c + '" data-card="' + i + '">'
+    + '<div class="head"><div class="nm"><label class="f" for="bn' + i + '">Bread</label><input type="text" id="bn' + i + '" data-b="' + i + '" data-f="name" value="' + esc(b.name) + '" placeholder="e.g. Country loaf" maxlength="40"></div>'
+    + '<div class="count"><label class="f" for="bc' + i + '">How many</label><input type="text" id="bc' + i + '" inputmode="numeric" min="0" step="1" data-b="' + i + '" data-f="count" value="' + esc(b.count || '') + '" placeholder="0"></div>'
+    + '<div><label class="f" for="bp' + i + '">Dough each, raw (g)</label><input type="text" id="bp' + i + '" inputmode="decimal" min="0" step="any" data-b="' + i + '" data-f="portion" value="' + esc(b.portion) + '" style="font-family:var(--mono);text-align:right"></div>'
+    + '<div class="x"><button class="iconx" type="button" data-delb="' + i + '" aria-label="Remove ' + esc(b.name || 'this bread') + '">×</button></div></div>'
+    + '<div class="body"><table class="ing"><tbody>' + rows + '</tbody></table>'
+    + '<div class="bfoot"><button class="btn small" type="button" data-addg="' + i + '">+ Ingredient</button><span class="grow"></span><span class="stat" id="bstat' + i + '"></span></div>'
+    + '<div class="err" id="berr' + i + '" hidden></div></div></article>';
+}
+function renderBreads(){
+  $('breads').innerHTML = S.breads.map(breadCard).join('');
+  var lim = !isPro() && S.breads.length >= FREE_BREADS;
+  $('breadLimitNote').textContent = lim ? 'Free plans up to ' + FREE_BREADS + ' breads. Pro has no limit.' : '';
+}
+function renderBreadStats(P){
+  P.breads.forEach(function(r){
+    var st = $('bstat' + r.i), er = $('berr' + r.i); if(!st) return;
+    var bits = [];
+    if(r.hyd != null) bits.push(Math.round(r.hyd) + '% water');
+    if(r.levPct != null && r.levPct > 0) bits.push(Math.round(r.levPct) + '% levain');
+    if(r.need > 0) bits.push(fmtG(r.need) + ' dough');
+    st.textContent = bits.join(' · ');
+    if(r.err){ er.hidden = false; er.textContent = r.err; } else er.hidden = true;
+  });
+}
+function fillSettings(){
+  $('waste').value = S.waste;
+  renderLevs(true);
+  var D = S.day;
+  $('dDate').value = D.date || ''; $('dReady').value = D.ready || ''; $('dClock').value = D.clock;
+  $('mCap').value = D.mCap; $('mMin').value = D.mMin; $('oCap').value = D.oCap; $('oMin').value = D.oMin; $('oPre').value = D.oPre;
+  $('bulkH').value = D.bulkH; $('shapeM').value = D.shapeM; $('restM').value = D.restM; $('retard').checked = !!D.retard; $('retH').value = D.retH;
+  $('retLbl').textContent = D.retard ? 'Fridge time before first load (hours)' : 'Final proof before first load (hours)';
+}
+
+/* one block of feed settings per differently named levain line in the recipes */
+var levSig = '';
+function levKeys(){
+  var keys = [], names = {};
+  S.breads.forEach(function(b){ (b.ing || []).forEach(function(g){ if(g.k === 'levain'){ var k = levKey(g.n); if(keys.indexOf(k) < 0){ keys.push(k); names[k] = (g.n || '').trim() || 'Levain'; } } }); });
+  return {keys: keys, names: names};
+}
+function renderLevs(force){
+  var o = levKeys(), sig = o.keys.join('|');
+  if(!force && sig === levSig) return;
+  levSig = sig;
+  if(!o.keys.length){ $('levs').innerHTML = '<p class="hint">None of your recipes has a line marked Levain, so there is nothing to build.</p>'; return; }
+  $('levs').innerHTML = o.keys.map(function(k, i){
+    var L = levSettings(S, k), a = ' data-lk="' + esc(k) + '"', id = 'lv' + i;
+    return (o.keys.length > 1 ? '<p class="sub">' + esc(o.names[k]) + '</p>' : '') + '<div class="grid">'
+      + '<div><label class="f">Feed ratio: starter : flour : water</label><div class="ratio"><input type="text"' + a + ' data-lf="s" value="' + esc(L.s) + '" aria-label="' + esc(o.names[k]) + ' starter parts" inputmode="decimal" min="0" step="any"><span>:</span><input type="text"' + a + ' data-lf="f" value="' + esc(L.f) + '" aria-label="' + esc(o.names[k]) + ' flour parts" inputmode="decimal" min="0" step="any"><span>:</span><input type="text"' + a + ' data-lf="w" value="' + esc(L.w) + '" aria-label="' + esc(o.names[k]) + ' water parts" inputmode="decimal" min="0" step="any"></div></div>'
+      + '<div><label class="f" for="' + id + 'k">Extra to keep back (g)</label><input type="text" id="' + id + 'k"' + a + ' data-lf="keep" value="' + esc(L.keep) + '" inputmode="decimal" min="0" step="any">' + (i === 0 ? '<p class="hint">Your next starter, plus a little spare.</p>' : '') + '</div>'
+      + '<div><label class="f" for="' + id + 'h">Hours until it\'s ripe</label><input type="text" id="' + id + 'h"' + a + ' data-lf="hours" value="' + esc(L.hours) + '" inputmode="decimal" min="0" step="0.5"></div>'
+      + '<div><label class="f" for="' + id + 'f">Flour it\'s fed with</label><input type="text" id="' + id + 'f"' + a + ' data-lf="flour" value="' + esc(L.flour) + '" maxlength="40"></div>'
+      + '<div><label class="f" for="' + id + 'v">Ripe starter you\'ll have (g)</label><input type="text" id="' + id + 'v"' + a + ' data-lf="have" value="' + esc(L.have) + '" inputmode="decimal" min="0" step="any" placeholder="optional">' + (i === 0 ? '<p class="hint">We warn you if the build needs more.</p>' : '') + '</div></div>';
+  }).join('');
+}
+
+/* ---------- render: the sheet ---------- */
+var lastPlan = null;
+function renderSheet(){
+  var P = plan(S); lastPlan = P;
+  renderBreadStats(P);
+  var el = $('sheet');
+  $('exNote').hidden = !S.example;
+  if(!P.pieces){
+    el.innerHTML = '<div class="empty"><b>Your bake-day sheet appears here.</b>Fill in a recipe and how many you\'re baking. Or <button class="btn small" type="button" id="btnEmptyEx">see an example bakery</button></div>';
+    $('bar').classList.remove('on'); $('btnPrint').disabled = true; $('btnCopy').disabled = true;
+    return P;
+  }
+  $('btnPrint').disabled = false; $('btnCopy').disabled = false;
+  var h = '';
+  h += '<h3>' + esc(fullDate()) + '</h3>';
+  h += '<div class="meta"><span>' + plural(P.pieces, 'loaf', 'loaves') + '</span><span>' + fmtKg(P.dough) + ' dough</span><span>' + P.batches.length + (P.batches.length === 1 ? ' mix' : ' mixes') + '</span><span>' + P.loads.length + (P.loads.length === 1 ? ' oven load' : ' oven loads') + '</span>' + (P.loads.length ? '<span>out by ' + clockOf(P.ready) + '</span>' : '') + '</div>';
+  P.errors.forEach(function(e){ h += '<div class="warnline">' + esc(e) + '</div>'; });
+
+  /* clock */
+  h += '<h4>Schedule <small>times rounded down to 5 min</small></h4><table class="clock"><tbody>';
+  var lastDay = null;
+  P.steps.forEach(function(s){
+    var d = dayOf(s.t), brk = lastDay !== null && d !== lastDay;
+    var dot = s.load != null ? P.loads[s.load].items.map(function(it){ return '<span class="dot" style="--c:' + it.bread.color + '"></span>'; }).join('') : s.mix ? '<span class="dot" style="--c:' + s.mix.bread.color + '"></span>' : '';
+    h += '<tr' + (brk ? ' class="daybreak"' : '') + '><td><span class="box"></span></td><td class="dy">' + (d !== lastDay ? esc(dayLabel(s.t)) : '') + '</td><td class="t">' + clockOf(s.t) + '</td><td class="what"><b>' + esc(s.what) + '</b>' + (s.detail ? '<br>' + dot + esc(s.detail) : '') + '</td></tr>';
+    lastDay = d;
+  });
+  h += '</tbody></table>';
+  P.notes.forEach(function(n){ h += '<div class="hint" style="margin:4px 0 0;color:#3a2a1c">' + esc(n) + '</div>'; });
+
+  /* pull list */
+  h += '<h4>Weigh out in total <small>for everything, incl. levain</small></h4><table><tbody>';
+  P.pull.forEach(function(p){ h += '<tr><td>' + esc(p.n) + '</td><td class="r g">' + fmtG(p.g) + '</td></tr>'; });
+  h += '</tbody></table>';
+
+
+  /* levain */
+  P.levs.forEach(function(lv){
+    h += '<h4>' + esc(lv.name) + ' build <small>' + esc(dayLabel(lv.feed)) + ' ' + clockOf(lv.feed) + '</small></h4>';
+    h += '<div class="levbox"><div><b>' + fmtG(lv.seed) + '</b><span>ripe starter</span></div><div><b>' + fmtG(lv.flour) + '</b><span>' + esc(lv.flourName) + '</span></div><div><b>' + fmtG(lv.water) + '</b><span>water</span></div><div class="tot"><b>' + fmtG(lv.total) + '</b><span>' + esc(lv.name.toLowerCase()) + '</span></div></div>';
+    h += '<div style="font-size:12.5px">Goes into: ' + lv.per.map(function(x){ return '<span class="dot" style="--c:' + x.color + '"></span>' + esc(x.name) + ' <span class="g">' + fmtG(x.g) + '</span>'; }).join(' · ') + (lv.keep ? ' · keep back <span class="g">' + fmtG(lv.keep) + '</span>' : '') + '</div>';
+  });
+
+  /* mixes */
+  h += '<h4>Mixes <small>in this order</small></h4><div class="mixes">';
+  P.batches.forEach(function(bt, i){
+    h += '<div class="batch" style="--c:' + bt.bread.color + '"><div class="bt"><span><span class="box"></span> ' + (i + 1) + '. ' + esc(bt.bread.name) + (bt.n > 1 ? ' (' + bt.k + ' of ' + bt.n + ')' : '') + '</span><span class="g">' + clockOf(bt.start) + ' · ' + fmtG(bt.g) + '</span></div><div class="mx">' + plural(bt.loaves, 'loaf', 'loaves') + ' · shape ' + clockOf(bt.shapeStart) + ' · ' + (S.day.retard ? 'fridge ' : 'proof ') + clockOf(bt.cold) + '</div><table><tbody>';
+    bt.lines.forEach(function(l){ h += '<tr><td>' + esc(l.n) + '</td><td class="r g">' + fmtG(l.g) + '</td></tr>'; });
+    h += '</tbody></table></div>';
+  });
+  h += '</div>';
+
+  /* divide */
+  h += '<h4>Divide &amp; shape</h4><table><thead><tr><th>Bread</th><th class="r">Loaves</th><th class="r">Scale each at</th></tr></thead><tbody>';
+  P.breads.filter(function(r){ return r.need > 0; }).forEach(function(r){ h += '<tr><td><span class="dot" style="--c:' + r.color + '"></span>' + esc(r.name) + '</td><td class="r g">' + r.count + '</td><td class="r g">' + fmtG(r.portion) + '</td></tr>'; });
+  h += '</tbody></table>';
+
+  /* oven */
+  if(P.loads.length){
+    h += '<h4>Oven loads <small>' + (S.day.oCap ? Math.floor(pos(S.day.oCap)) + ' per load' : '') + '</small></h4>';
+    P.loads.forEach(function(ld, i){
+      var dots = ''; ld.items.forEach(function(it){ for(var k = 0; k < it.n; k++) dots += '<i style="--c:' + it.bread.color + '"></i>'; });
+      h += '<div class="load"><span class="lt">' + clockOf(ld.start) + '</span><div><b>Load ' + (i + 1) + '</b> · ' + ld.items.map(function(it){ return esc(it.bread.name) + ' ×' + it.n; }).join(', ') + '<div class="loaves" aria-hidden="true">' + dots + '</div></div></div>';
+    });
+  }
+
+  h += '<div class="credit"><span>Dough includes ' + (pos(S.waste)) + '% for bowl &amp; scaling loss.</span>'
+    + (isPro() ? '<span>Bake Day</span>' : '<span>Made with Bake Day · free at samsbench.com/bake-day</span>') + '</div>';
+  el.innerHTML = h;
+
+  if(P.lev){ $('barTxt').innerHTML = 'Feed ' + esc(P.levs.length > 1 ? 'first levain' : P.lev.name.toLowerCase()) + ' <b>' + esc(dayLabel(P.feed)) + ' ' + clockOf(P.feed) + '</b>' + (P.levs.length === 1 ? ' · ' + fmtG(P.lev.total) : ''); }
+  else $('barTxt').innerHTML = 'Start mixing <b>' + esc(dayLabel(P.mixStart)) + ' ' + clockOf(P.mixStart) + '</b>';
+  $('bar').classList.add('on');
+  if(P.ok && !S.example) trackOnce('sheet-ready');
+  return P;
+}
+
+function sheetText(P){
+  var t = [];
+  t.push('BAKE DAY · ' + fullDate());
+  t.push(plural(P.pieces, 'loaf', 'loaves') + ' · ' + fmtKg(P.dough) + ' dough · ' + plural(P.batches.length, 'mix', 'mixes') + ' · ' + plural(P.loads.length, 'oven load', 'oven loads'));
+  P.errors.forEach(function(e){ t.push('! ' + e); });
+  t.push('', 'SCHEDULE');
+  var lastDay = null;
+  P.steps.forEach(function(s){ var d = dayOf(s.t); if(d !== lastDay) t.push('-- ' + dayLabel(s.t)); lastDay = d; t.push('[ ] ' + clockOf(s.t) + '  ' + s.what + (s.detail ? ': ' + s.detail : '')); });
+  P.notes.forEach(function(n){ t.push('Note: ' + n); });
+  P.levs.forEach(function(lv){ t.push('', lv.name.toUpperCase() + ' (' + dayLabel(lv.feed) + ' ' + clockOf(lv.feed) + ')', '  ' + fmtG(lv.seed) + ' ripe starter + ' + fmtG(lv.flour) + ' ' + lv.flourName + ' + ' + fmtG(lv.water) + ' water = ' + fmtG(lv.total)); });
+  t.push('', 'MIXES');
+  P.batches.forEach(function(bt, i){ t.push((i + 1) + '. ' + bt.bread.name + (bt.n > 1 ? ' (' + bt.k + '/' + bt.n + ')' : '') + ' · ' + clockOf(bt.start) + ' · ' + fmtG(bt.g) + ' · ' + plural(bt.loaves, 'loaf', 'loaves') + ', shape ' + clockOf(bt.shapeStart)); bt.lines.forEach(function(l){ t.push('     ' + l.n + ': ' + fmtG(l.g)); }); });
+  t.push('', 'DIVIDE & SHAPE');
+  P.breads.filter(function(r){ return r.need > 0; }).forEach(function(r){ t.push('  ' + r.name + ': ' + r.count + ' × ' + fmtG(r.portion)); });
+  t.push('', 'OVEN');
+  P.loads.forEach(function(ld, i){ t.push('  ' + clockOf(ld.start) + '  Load ' + (i + 1) + ': ' + ld.items.map(function(it){ return it.bread.name + ' ×' + it.n; }).join(', ')); });
+  t.push('', 'WEIGH OUT IN TOTAL');
+  P.pull.forEach(function(p){ t.push('  ' + p.n + ': ' + fmtG(p.g)); });
+  if(!isPro()) t.push('', 'Made with Bake Day, free at ' + SITE + '?via=text');
+  return t.join('\n');
+}
+
+/* ---------- render: Pro ---------- */
+function getDays(){ try{ return JSON.parse(localStorage.getItem(DAYSKEY) || '[]'); }catch(e){ return []; } }
+function setDays(d){ try{ localStorage.setItem(DAYSKEY, JSON.stringify(d)); return true; }catch(e){ return false; } }
+function renderPro(){
+  var el = $('proSec'), h = '';
+  if(isPro()){
+    h += '<h2 id="hPro">Pro</h2><p class="lead" style="margin-bottom:10px">Unlocked' + (PRO.key.indexOf('gift:') === 0 ? ' with a gift code' : ' for ' + esc(PRO.key)) + '. No bread limit.</p>';
+    h += '<p class="sub">Paste this bake\'s orders</p><p class="hint" style="margin-top:0">One line per order item, like <span class="num">2 Country loaf</span>, <span class="num">Seeded x3</span>, or a CSV export with the item and quantity. Lines are matched to your bread names.</p>';
+    h += '<textarea id="pasteIn" aria-label="Orders to paste" placeholder="2 Country loaf&#10;Seeded x 1&#10;Olive &amp; rosemary, 3"></textarea>';
+    h += '<div class="row" style="margin-top:8px"><div class="shrink" style="flex:0"><button class="btn primary" type="button" id="btnPaste">Count them up</button></div><div><label class="chk"><input type="checkbox" id="pasteAdd"> Add to the counts already there</label></div></div><p class="actnote" id="pasteNote"></p>';
+    h += '<p class="sub">Saved bake days</p><div class="row"><div><label class="f" for="dayName">Name this plan</label><input type="text" id="dayName" maxlength="40" placeholder="e.g. Friday market"></div><div style="flex:0"><button class="btn" type="button" id="btnSaveDay">Save</button></div></div>';
+    var ds = getDays();
+    h += '<div class="days">' + (ds.length ? ds.map(function(d, i){ return '<div class="d"><b>' + esc(d.title) + '</b><span class="num" style="font-size:13px">' + esc(d.saved) + '</span><button class="btn small" type="button" data-openday="' + i + '">Open</button><button class="btn small ghost" type="button" data-delday="' + i + '">Delete</button></div>'; }).join('') : '<p class="hint">Nothing saved yet. Save each bake you run (Tuesday pickups, Friday market) and switch between them.</p>') + '</div>';
+    h += '<p class="actnote" id="dayNote"></p>';
+  } else {
+    var url = buyUrl();
+    h += '<h2 id="hPro">Bake Day Pro' + (PRICE ? ' <span class="price">' + esc(PRICE) + '</span>' : '') + '</h2>';
+    h += '<p class="lead" style="margin:4px 0 0">One payment, no subscription.</p><ul><li><b>As many breads as you bake.</b> Free stops at ' + FREE_BREADS + '.</li><li><b>Paste your orders</b> from Hotplate, a form or your notes, and the counts fill themselves in.</li><li><b>Save each bake day</b> (Tuesday pickups, Friday market) and switch between them.</li><li>No “made with” line on your printed sheet.</li></ul>';
+    h += url ? '<p><a class="btn primary" data-buy="1" href="' + esc(url) + '" rel="noopener">Get Pro' + (PRICE ? ' for ' + esc(PRICE) : '') + '</a></p>' : '<p class="hint">Pro opens soon. Got a gift code? Enter it below.</p>';
+    h += '<div class="row" style="margin-top:14px"><div><label class="f" for="licKey">Already bought? The email you paid with, or your gift code</label><input type="text" id="licKey" autocomplete="email" spellcheck="false" placeholder="you@bakery.com or GIFT-CODE"></div><div style="flex:0"><button class="btn" type="button" id="btnLic">Unlock Pro</button></div></div><p class="actnote" id="licNote" aria-live="polite"></p>';
+  }
+  el.innerHTML = h;
+}
+
+/* ---------- paste orders (Pro) ----------
+   Three shapes: a CSV/TSV export with an item column and a quantity column; a wide form export with one column per bread;
+   or free lines ("2 Country loaf, 1 Seeded", "Seeded x3"). Times, dates, prices, weights and order numbers are never read as quantities. */
+function norm(x){ return String(x == null ? '' : x).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, ' ').trim(); }
+function splitRow(line, sep){
+  var out = [], cur = '', q = false;
+  for(var i = 0; i < line.length; i++){
+    var ch = line[i];
+    if(q){ if(ch === '"'){ if(line[i + 1] === '"'){ cur += '"'; i++; } else q = false; } else cur += ch; }
+    else if(ch === '"') q = true;
+    else if(ch === sep){ out.push(cur); cur = ''; }
+    else cur += ch;
+  }
+  out.push(cur); return out.map(function(c){ return c.trim(); });
+}
+function cleanLine(raw){
+  return ' ' + String(raw)
+    .replace(/\b\d{1,2}:\d{2}(:\d{2})?\s*([ap]\.?m\.?)?/gi, ' ')          // 9:00, 9:00:11 AM
+    .replace(/\b\d{1,2}\s*[ap]\.?m\.?(?![a-z])/gi, ' ')                    // 9am
+    .replace(/\b\d{1,4}[\/.-]\d{1,2}([\/.-]\d{2,4})?\b/g, ' ')             // 11/28, 2026-11-28
+    .replace(/\b(jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\.?\s+\d{1,2}(st|nd|rd|th)?\b/gi, ' ')
+    .replace(/\b\d{1,2}(st|nd|rd|th)?\s+(jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\b/gi, ' ')
+    .replace(/[$£€]\s*\d+([.,]\d+)?/g, ' ').replace(/\b\d+([.,]\d+)?\s*(usd|eur|gbp|dollars?)\b/gi, ' ')
+    .replace(/\b\d+([.,]\d+)?\s*(g|kg|gr|grams?|lbs?|oz|%)(?![a-z])/gi, ' ')
+    .replace(/#\s*\d+/g, ' ').replace(/\b\d{4,}\b/g, ' ')
+    .replace(/\b(\d+)\.0+\b/g, '$1').replace(/\b\d+[.,]\d+\b/g, ' ') + ' ';
+}
+function parseOrders(text, breads){
+  var B = breads.map(function(b, i){ return {i: i, n: norm(b.name)}; }).filter(function(x){ return x.n; }).sort(function(a, b){ return b.n.length - a.n.length; });
+  var counts = {}, unmatched = [], mode = 'lines';
+  function add(i, q){ counts[i] = (counts[i] || 0) + q; }
+  function findBread(cell){ var c = ' ' + norm(cell) + ' '; for(var k = 0; k < B.length; k++) if(c.indexOf(' ' + B[k].n + ' ') >= 0) return B[k]; return null; }
+  var lines = String(text || '').split(/\r?\n/).filter(function(l){ return l.trim(); });
+  if(!lines.length) return {counts: counts, unmatched: unmatched, mode: mode};
+  var sep = lines[0].indexOf('\t') >= 0 ? '\t' : (lines[0].split(';').length > lines[0].split(',').length ? ';' : ',');
+  var head = splitRow(lines[0], sep);
+  if(head.length >= 2 && lines.length >= 2 && !head.some(function(h){ return /\d/.test(h); })){
+    var hn = head.map(norm);
+    var qcol = hn.findIndex(function(h){ return /^(qty|quantity|count|amount|units|number|no|how many)\b/.test(h) || / (qty|quantity)$/.test(h); });
+    var icol = hn.findIndex(function(h, j){ return j !== qcol && /(item|product|name|title|description|bread|variant)/.test(h) && !/customer|buyer|first|last|email/.test(h); });
+    var wide = head.map(function(h){ return findBread(h); });
+    var wideN = wide.filter(Boolean).length;
+    if(wideN >= 1 && (qcol < 0 || icol < 0)){
+      mode = 'columns';
+      lines.slice(1).forEach(function(l){ var cells = splitRow(l, sep);
+        wide.forEach(function(bm, j){ if(!bm) return; var c = (cells[j] || '').trim(); if(!c) return;
+          var v = /^(yes|y|x|✓|✔|true)$/i.test(c) ? 1 : Math.round(num(c.replace(/[^0-9.,-]/g, '')));
+          if(v > 0) add(bm.i, v); }); });
+      return {counts: counts, unmatched: unmatched, mode: mode};
+    }
+    if(qcol >= 0 && icol >= 0){
+      mode = 'table';
+      lines.slice(1).forEach(function(l){ var cells = splitRow(l, sep), bm = findBread(cells[icol] || '');
+        if(!bm){ if((cells[icol] || '').trim()) unmatched.push(l.trim()); return; }
+        var raw = (cells[qcol] || '').trim(), v = raw === '' ? 1 : Math.round(num(raw));
+        if(v > 0) add(bm.i, v); });
+      return {counts: counts, unmatched: unmatched, mode: mode};
+    }
+  }
+  /* free lines */
+  lines.forEach(function(raw){
+    var l = ' ' + norm(cleanLine(raw)) + ' ', hits = [];
+    B.forEach(function(x){
+      var from = 0, at;
+      while((at = l.indexOf(' ' + x.n + ' ', from)) >= 0){
+        var st = at + 1, en = st + x.n.length;
+        if(!hits.some(function(h){ return st < h.en && en > h.st; })) hits.push({i: x.i, st: st, en: en});
+        from = en;
+      }
+    });
+    if(!hits.length){ unmatched.push(raw.trim()); return; }
+    hits.sort(function(a, b){ return a.st - b.st; });
+    var before = function(k){ var seg = l.slice(k ? hits[k - 1].en : 0, hits[k].st), m = seg.match(/(?:^|\s)(\d{1,3})\s*(?:x\s*)?$/); return m ? parseInt(m[1], 10) : null; };
+    var after = function(k){ var seg = l.slice(hits[k].en, k + 1 < hits.length ? hits[k + 1].st : l.length), m = seg.match(/^\s*(?:x\s*|qty\s*|quantity\s*)?(\d{1,3})(?:\s|$)/) || seg.match(/^\s*(\d{1,3})\s*x(?:\s|$)/); return m ? parseInt(m[1], 10) : null; };
+    var qtyFirst = before(0) != null;
+    hits.forEach(function(h, k){
+      var q = qtyFirst ? before(k) : after(k);
+      if(q == null) q = qtyFirst ? after(k) : before(k);
+      if(q == null){   // not next to the name: use the one number left in this item's stretch of the line, if there is exactly one
+        var seg = l.slice(k ? hits[k - 1].en : 0, k + 1 < hits.length ? hits[k + 1].st : l.length).replace(' ' + B.filter(function(x){ return x.i === h.i; })[0].n + ' ', ' ');
+        var ns = seg.match(/(?:^|\s)\d{1,3}(?=\s|$)/g);
+        q = ns && ns.length === 1 ? parseInt(ns[0], 10) : 1;
+      }
+      if(q > 0) add(h.i, q);
+    });
+  });
+  return {counts: counts, unmatched: unmatched, mode: mode};
+}
+
+/* ---------- events ---------- */
+var started = false, pendingPaste = null;
+function changed(){ if(!started && !S.example){ started = true; trackOnce('tool-start'); } save(); renderLevs(false); renderSheet(); }
+function toast(msg){ var t = $('toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toast.h); toast.h = setTimeout(function(){ t.classList.remove('on'); }, 1800); }
+function renderAll(){ renderBreads(); fillSettings(); renderPro(); renderSheet(); }
+
+document.addEventListener('input', function(e){
+  var t = e.target, d = t.dataset;
+  if(d.b != null && d.f){
+    var b = S.breads[+d.b]; if(!b) return;
+    if(d.g != null){ var g = b.ing[+d.g]; if(!g) return; g[d.f] = t.value; }
+    else b[d.f] = t.value;
+    if(S.example){ S.example = false; }
+    changed(); return;
+  }
+  if(d.lk != null && d.lf){ S.levx = S.levx || {}; S.levx[d.lk] = S.levx[d.lk] || {}; S.levx[d.lk][d.lf] = t.value; if(S.example) S.example = false; changed(); return; }
+  var map = {waste: ['waste'],
+    dDate: ['day','date'], dReady: ['day','ready'], mCap: ['day','mCap'], mMin: ['day','mMin'], oCap: ['day','oCap'], oMin: ['day','oMin'], oPre: ['day','oPre'],
+    bulkH: ['day','bulkH'], shapeM: ['day','shapeM'], restM: ['day','restM'], retH: ['day','retH']};
+  var p = map[t.id];
+  if(p){ if(p.length === 1) S[p[0]] = t.value; else S[p[0]][p[1]] = t.value; if(S.example) S.example = false; changed(); }
+});
+document.addEventListener('change', function(e){
+  var t = e.target, d = t.dataset;
+  if(d.b != null && d.f === 'k'){ var g = S.breads[+d.b] && S.breads[+d.b].ing[+d.g]; if(g){ g.k = t.value; if(g.k === 'levain' && !g.n) g.n = 'Levain'; } S.example = false; renderBreads(); changed(); return; }
+  if(t.id === 'dClock'){ S.day.clock = t.value; save(); renderSheet(); return; }
+  if(t.id === 'retard'){ S.day.retard = t.checked; if(!t.checked && num(S.day.retH) > 4) S.day.retH = 2; if(t.checked && num(S.day.retH) < 6) S.day.retH = 12; S.example = false; fillSettings(); changed(); return; }
+});
+document.addEventListener('click', function(e){
+  var t = e.target.closest('button,a'); if(!t) return;
+  var d = t.dataset;
+  if(t.id === 'btnHeroExample' || t.id === 'btnEmptyEx'){
+    var hasOwn = !S.example && S.breads.some(function(b){ return num(b.count) > 0 || (b.name || '').trim(); });
+    if(hasOwn && !confirm('Replace your breads with the example? Your own numbers will be lost.')) return;
+    S = example(); save(); track('example'); renderAll(); toast('Example bakery loaded');
+    if(window.matchMedia('(max-width:1060px)').matches) $('breadsSec').scrollIntoView({behavior: 'smooth'});
+    return;
+  }
+  if(t.id === 'btnClear'){ var clk = S.day.clock; S = blank(); S.day.clock = clk; save(); renderAll(); if($('bn0')) $('bn0').focus(); return; }
+  if(t.id === 'btnAddBread'){
+    if(!isPro() && S.breads.length >= FREE_BREADS){ track('limit-hit'); $('proSec').scrollIntoView({behavior: 'smooth'}); trackOnce('pro-view'); toast('Free plans up to ' + FREE_BREADS + ' breads'); return; }
+    S.breads.push(blankBread('')); S.example = false; renderBreads(); changed(); var nb = $('bn' + (S.breads.length - 1)); if(nb) nb.focus(); return;
+  }
+  if(d.delb != null){ var b = S.breads[+d.delb]; if(b && ((b.name || '').trim() || num(b.count) > 0) && !confirm('Remove ' + (b.name || 'this bread') + '?')) return; S.breads.splice(+d.delb, 1); if(!S.breads.length) S.breads.push(blankBread('')); S.example = false; renderBreads(); changed(); return; }
+  if(d.addg != null){ var bb = S.breads[+d.addg]; if(bb){ bb.ing.push({n: '', a: '', k: 'other'}); S.example = false; renderBreads(); changed(); var ins = document.querySelectorAll('[data-card="' + d.addg + '"] .ing input[data-f="n"]'); if(ins.length) ins[ins.length - 1].focus(); } return; }
+  if(d.delg != null){ var pr = d.delg.split(':'), b2 = S.breads[+pr[0]]; if(b2){ b2.ing.splice(+pr[1], 1); S.example = false; renderBreads(); changed(); } return; }
+  if(t.id === 'btnPrint'){ if(!lastPlan || !lastPlan.pieces) return; track('export-print'); window.print(); return; }
+  if(t.id === 'btnCopy'){
+    if(!lastPlan || !lastPlan.pieces) return;
+    var txt = sheetText(lastPlan), done = function(){ $('actNote').textContent = 'Copied. Paste it into a message to whoever is baking with you.'; track('export-copy'); };
+    if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, function(){ window.prompt('Copy:', txt); done(); }); else { window.prompt('Copy:', txt); done(); }
+    return;
+  }
+  if(t.id === 'btnLic'){
+    var k = $('licKey').value.trim(); if(!k){ $('licKey').focus(); return; }
+    $('licNote').textContent = 'Checking…'; t.disabled = true;
+    if(k.indexOf('@') < 0){
+      checkGift(k).then(function(ok){ t.disabled = false;
+        if(ok){ PRO.key = 'gift:' + k.toUpperCase().replace(/\s+/g, ''); PRO.kind = 'lifetime'; savePro(); track('pro-unlocked-gift'); renderAll(); toast('Pro unlocked'); }
+        else $('licNote').textContent = 'That gift code was not recognised. Check the spelling, or enter the email you paid with.'; });
+      return;
+    }
+    verifyLicense(k.toLowerCase()).then(function(j){ t.disabled = false;
+      if(j.valid){ PRO.key = k.toLowerCase(); PRO.kind = j.kind || 'lifetime'; savePro(); track('pro-unlocked'); renderAll(); toast('Pro unlocked'); }
+      else $('licNote').textContent = 'No Pro purchase found for that email. Use the email on your Whop receipt; if it still fails, reply to the receipt and we will sort it out.';
+    }, function(){ t.disabled = false; $('licNote').textContent = 'Could not check right now. Check your connection and try again in a minute.'; });
+    return;
+  }
+  if(t.id === 'btnPaste'){
+    var r = parseOrders($('pasteIn').value, S.breads), add = $('pasteAdd').checked, rows = [], any = Object.keys(r.counts).length;
+    pendingPaste = null;
+    if(!any){ $('pasteNote').textContent = 'No bread names found. The lines need to mention your breads by the names on this page.' + (r.unmatched.length ? ' First line: ' + r.unmatched[0] : ''); return; }
+    var next = S.breads.map(function(b, i){ var cur = Math.max(0, Math.round(num(b.count))); return add ? cur + (r.counts[i] || 0) : (r.counts[i] || 0); });
+    S.breads.forEach(function(b, i){ rows.push('<tr><td>' + esc(b.name || ('Bread ' + (i + 1))) + '</td><td class="num" style="text-align:right">' + Math.max(0, Math.round(num(b.count))) + ' → <b>' + next[i] + '</b></td></tr>'); });
+    pendingPaste = next;
+    $('pasteNote').innerHTML = '<table style="border-collapse:collapse;margin:4px 0 8px">' + rows.join('') + '</table>'
+      + (r.unmatched.length ? '<span>Not matched to a bread (' + r.unmatched.length + '): ' + esc(r.unmatched.slice(0, 4).join(' | ')) + (r.unmatched.length > 4 ? ' …' : '') + '</span><br>' : '')
+      + '<button class="btn small primary" type="button" id="btnPasteUse">Use these counts</button>';
+    return;
+  }
+  if(t.id === 'btnPasteUse'){
+    if(!pendingPaste) return;
+    S.breads.forEach(function(b, i){ b.count = pendingPaste[i]; });
+    pendingPaste = null; S.example = false; track('paste-orders'); renderBreads(); changed();
+    $('pasteNote').textContent = 'Counts updated.';
+    return;
+  }
+  if(t.id === 'btnSaveDay'){
+    var title = ($('dayName').value || '').trim() || fullDate(), ds = getDays(), idx = -1;
+    ds.forEach(function(x, i){ if(x.title === title) idx = i; });
+    var rec = {title: title, saved: isoDate(new Date()), data: JSON.parse(JSON.stringify(S))};
+    if(idx >= 0) ds[idx] = rec; else ds.unshift(rec);
+    var ok = setDays(ds); track('save-day'); renderPro(); $('dayNote').textContent = ok ? 'Saved "' + title + '".' : 'Could not save: browser storage is full or blocked.'; return;
+  }
+  if(d.openday != null){ var x = getDays()[+d.openday]; if(x){ var b0 = blank(); S = Object.assign(b0, x.data); S.lev = Object.assign(blank().lev, x.data.lev); S.levx = x.data.levx || {}; S.day = Object.assign(blank().day, x.data.day); save(); renderAll(); toast('Opened ' + x.title); } return; }
+  if(d.delday != null){ var ds2 = getDays(), y = ds2[+d.delday]; if(y && confirm('Delete ' + y.title + '?')){ ds2.splice(+d.delday, 1); setDays(ds2); renderPro(); } return; }
+  if(t.matches('a[data-buy]')){ track('buy-click'); return; }
+});
+/* Pro section seen: counted once per tab when at least half of it is on screen */
+if('IntersectionObserver' in window){
+  var io = new IntersectionObserver(function(es){ es.forEach(function(en){ if(en.isIntersecting && !isPro()) trackOnce('pro-view'); }); }, {threshold: 0.5});
+  setTimeout(function(){ io.observe($('proSec')); }, 1500);
+}
+window.addEventListener('beforeprint', function(){ if(lastPlan && lastPlan.pieces) trackOnce('print-dialog'); });
+
+/* ---------- boot ---------- */
+loadPro(); affCode();
+var had = load();
+if(had && !S.example) started = true;
+renderAll();
+if(GC_CODE){ var gs = document.createElement('script'); gs.async = true; gs.src = '//gc.zgo.at/count.js'; gs.setAttribute('data-goatcounter', 'https://' + GC_CODE + '.goatcounter.com/count'); document.head.appendChild(gs); }
+(function(){
+  var q = new URLSearchParams(location.search);
+  var via = (q.get('via') || '').replace(/[^a-z0-9-]/g, '').slice(0, 20), af = (q.get('a') || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 40);
+  if(via) track('via-' + via);
+  if(af) track('aff-' + af);
+  if(q.get('bought') === '1' && !isPro()){
+    setTimeout(function(){ var ln = $('licNote'), lk = $('licKey'); if(ln) ln.textContent = 'Thanks! Enter the email you just used on Whop and press Unlock Pro.'; $('proSec').scrollIntoView(); if(lk) lk.focus(); }, 400);
+  }
+})();
+window.__bd = {plan: plan, parseOrders: parseOrders, example: example, blank: blank, clockOf: function(m, c){ var o = S.day.clock; S.day.clock = c || '24'; var r = clockOf(m); S.day.clock = o; return r; }};
+})();
+</script>
+</body>
+</html>
