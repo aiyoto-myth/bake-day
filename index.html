@@ -208,6 +208,8 @@ footer a{color:var(--ink)}
   .batch{padding:4px 6px;margin:0 0 5px}
   .levbox b{font-size:14px} .levbox div{padding:3px}
   .load{padding:2px 0} .loaves i{width:10px;height:10px}
+  .sheet{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .levbox .tot{background:#fff;color:#1b120a;border-width:3px}
   .batch,.load,.clock tr{break-inside:avoid}
 }
 </style>
@@ -263,7 +265,7 @@ footer a{color:var(--ink)}
     <div class="grid">
       <div><label class="f" for="bulkH">Bulk ferment (hours)</label><input type="text" id="bulkH" inputmode="decimal" min="0" step="0.25"></div>
       <div><label class="f" for="shapeM">Divide &amp; shape (minutes per loaf)</label><input type="text" id="shapeM" inputmode="decimal" min="0" step="0.5"></div>
-      <div><label class="f" for="restM">Bench rest after pre-shape (minutes)</label><input type="text" id="restM" inputmode="numeric" min="0" step="5"></div>
+      <div><label class="f" for="restM">Rest after shaping, before the fridge (minutes)</label><input type="text" id="restM" inputmode="numeric" min="0" step="5"></div>
       <div><label class="chk"><input type="checkbox" id="retard"> Cold retard overnight</label></div>
       <div><label class="f" for="retH" id="retLbl">Fridge time before first load (hours)</label><input type="text" id="retH" inputmode="decimal" min="0" step="0.5"></div>
     </div>
@@ -332,10 +334,11 @@ function load(){
 }
 
 /* ---------- numbers ---------- */
-/* Typed numbers: "5,5" is 5.5 (comma decimals); "1,000" and "12,500" are thousands. */
+/* Typed numbers: "5,5" is 5.5 (comma decimals); "1,000", "12,500" and "1.000" are thousands. */
 function num(v){
   var t = String(v == null ? '' : v).trim().replace(/\s+/g, '');
-  if(/^-?\d{1,3}(,\d{3})+(\.\d+)?$/.test(t)) t = t.replace(/,/g, ''); else t = t.replace(',', '.');
+  if(/^-?\d{1,3}(,\d{3})+(\.\d+)?$/.test(t)) t = t.replace(/,/g, '');
+  else if(/^-?\d{1,3}(\.\d{3})+(,\d+)?$/.test(t)) t = t.replace(/\./g, '').replace(',', '.');   // 1.000 / 12.500,5 else t = t.replace(',', '.');
   var x = parseFloat(t); return isFinite(x) ? x : 0;
 }
 function pos(v){ var x = num(v); return x > 0 ? x : 0; }
@@ -379,7 +382,7 @@ function plan(st){
     (b.ing || []).forEach(function(g){ var a = pos(g.a); if(!(a > 0)) return;
       var nm = (g.n || '').trim() || KINDS.filter(function(k){ return k[0] === g.k; })[0][1];
       r.lines.push({n: nm, k: g.k, g: a * sc});
-      if(g.k === 'levain' && sc > 0){ var lv = levOf(g.n); lv.use += a * sc; lv.per.push({name: r.name, color: r.color, g: a * sc}); r.levain += a * sc; } });
+      if(g.k === 'levain' && sc > 0){ var lv = levOf(g.n); lv.use += a * sc; lv.per.push({name: r.name, color: r.color, g: a * sc, r: r}); r.levain += a * sc; } });
     doughTotal += r.need; if(r.need > 0) pieces += r.count;
     if(r.err) P.errors.push(r.name + ': ' + r.err);
     P.breads.push(r);
@@ -418,10 +421,10 @@ function plan(st){
 
   /* forward from the first mix (t = 0): each mix bulks, then is shaped as soon as the bench is free, rests, then goes cold */
   var mMin = pos(D.mMin), bulk = pos(D.bulkH) * 60, shapeM = pos(D.shapeM), rest = pos(D.restM), ret = pos(D.retH) * 60;
-  var benchFree = -Infinity;
+  var benchFree = -Infinity, mixerFree = 0;
   P.batches.forEach(function(m, i){
-    m.start = i * mMin; m.end = m.start + mMin;
-    m.shapeStart = Math.max(m.end + bulk, benchFree);
+    m.start = Math.max(mixerFree, benchFree - bulk - mMin); m.end = m.start + mMin; mixerFree = m.end;   // wait for the bench rather than over-proof
+    m.shapeStart = m.end + bulk;
     m.shapeEnd = m.shapeStart + m.loaves * shapeM; benchFree = m.shapeEnd;
     m.cold = m.shapeEnd + rest;
   });
@@ -460,7 +463,10 @@ function plan(st){
 
   var steps = [];
   P.levs.forEach(function(lv){
-    lv.feed = mixStart - lv.hours * 60;
+    var uses = P.batches.filter(function(m){ return lv.per.some(function(x){ return x.r === m.bread; }); });
+    lv.first = uses.length ? uses[0].start : mixStart; lv.last = uses.length ? uses[uses.length - 1].start : mixStart;
+    lv.feed = lv.first - lv.hours * 60;
+    if(lv.last - lv.first > 90) P.notes.push('The ' + lv.name.toLowerCase() + ' is used from ' + clockOf(lv.first) + ' to ' + clockOf(lv.last) + '. If it peaks fast, split it into two builds (give the later breads\' levain line another name).');
     steps.push({t: lv.feed, what: 'Feed the ' + lv.name.toLowerCase(), detail: fmtG(lv.seed) + ' ripe starter + ' + fmtG(lv.flour) + ' ' + lv.flourName + ' + ' + fmtG(lv.water) + ' water'});
   });
   var feed = P.levs.length ? Math.min.apply(null, P.levs.map(function(lv){ return lv.feed; })) : mixStart;
@@ -483,6 +489,7 @@ function plan(st){
   if(!D.retard && longest > ret + 60) P.notes.push('Without a cold retard, some loaves wait ' + fmtDur(longest - ret) + ' longer than others. Keep them cool if you can.');
   var lastMixEnd = P.batches.length ? P.batches[P.batches.length - 1].end : 0;
   if(P.batches.length && lastMixEnd > P.batches[0].shapeStart + 1) P.notes.push('Mixing and shaping overlap from ' + clockOf(P.batches[0].shapeStart) + ' to ' + clockOf(lastMixEnd) + '. You need a second pair of hands, or a longer bulk.');
+  if(P.batches.length && nLoads && P.batches[P.batches.length - 1].shapeEnd > firstLoad - pre + 1) P.notes.push('Shaping runs into oven time (from ' + clockOf(firstLoad - pre) + '). One person can\'t do both.');
   P.levs.forEach(function(lv){
     var tod = ((lv.feed % 1440) + 1440) % 1440;
     if(tod >= 23 * 60 || tod < 5 * 60) P.notes.push(lv.name + ' gets fed at ' + clockOf(lv.feed) + '. For a kinder hour, feed at a bigger ratio (say 1:10:10) and set a longer “hours until ripe”.');
@@ -560,19 +567,25 @@ function verifyLicense(email){
    SRC = this visit's ?via= (or "aff" for an affiliate link), kept for the tab; funnel events are sent twice:
    plain ("buy-click") and with the source ("buy-click.wl3"), so every channel can be followed down to the buy button. */
 var GC_CODE = 'bakeday';
+function cleanVia(v){ return String(v || '').toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 20); }
 var SRC = (function(){ try{
-  var q = new URLSearchParams(location.search), v = (q.get('via') || '').replace(/[^a-z0-9-]/g, '').slice(0, 20) || (q.get('a') ? 'aff' : '');
-  if(v){ sessionStorage.setItem('bd.src', v); return v; }
-  return sessionStorage.getItem('bd.src') || '';
+  var q = new URLSearchParams(location.search), v = cleanVia(q.get('via')) || (q.get('a') ? 'aff' : '');
+  if(v){ localStorage.setItem('bd.src', JSON.stringify({v: v, t: Date.now()})); return v; }
+  var o = JSON.parse(localStorage.getItem('bd.src') || 'null');   // last source seen on this device, kept 30 days
+  return o && Date.now() - o.t < 30 * 864e5 ? o.v : '';
 }catch(e){ return ''; } })();
-var FUNNEL_EV = {'return-visit':1, 'example':1, 'tool-start':1, 'sheet-ready':1, 'export-print':1, 'export-copy':1, 'limit-hit':1, 'pro-view':1, 'buy-click':1, 'pro-unlocked':1, 'pro-unlocked-gift':1, 'paste-orders':1, 'save-day':1};
+var FUNNEL_EV = {'bought-return':1, 'unlock-fail':1, 'paste-none':1, 'return-visit':1, 'example':1, 'tool-start':1, 'sheet-ready':1, 'export-print':1, 'export-copy':1, 'limit-hit':1, 'pro-view':1, 'buy-click':1, 'pro-unlocked':1, 'pro-unlocked-gift':1, 'paste-orders':1, 'save-day':1};
 var ONCE = {};
-function track(name, tries){
+function gcCount(name, tries){
   try{
-    if(!tries && SRC && FUNNEL_EV[name]) track(name + '.' + SRC);
     if(window.goatcounter && window.goatcounter.count) window.goatcounter.count({path: name, title: name, event: true});
-    else if((tries || 0) < 20) setTimeout(function(){ track(name, (tries || 0) + 1); }, 500);
+    else if((tries || 0) < 20) setTimeout(function(){ gcCount(name, (tries || 0) + 1); }, 500);   // count.js loads async
   }catch(e){}
+}
+function track(name){
+  if(SRC === 'selftest') return;   // the selftest visit sends only ".selftest" copies, so real totals stay clean
+  if(SRC && FUNNEL_EV[name]) gcCount(name + '.' + SRC);
+  gcCount(name);
 }
 function trackOnce(name){ if(ONCE[name]) return; ONCE[name] = 1; try{ if(sessionStorage.getItem('bd.once.' + name)) return; sessionStorage.setItem('bd.once.' + name, '1'); }catch(e){} track(name); }
 
@@ -631,6 +644,7 @@ function levKeys(){
 function renderLevs(force){
   var o = levKeys(), sig = o.keys.join('|');
   if(!force && sig === levSig) return;
+  Object.keys(S.levx || {}).forEach(function(k){ if(o.keys.indexOf(k) < 0) delete S.levx[k]; });   // drop settings no recipe uses
   levSig = sig;
   if(!o.keys.length){ $('levs').innerHTML = '<p class="hint">None of your recipes has a line marked Levain, so there is nothing to build.</p>'; return; }
   $('levs').innerHTML = o.keys.map(function(k, i){
@@ -643,6 +657,11 @@ function renderLevs(force){
       + '<div><label class="f" for="' + id + 'v">Ripe starter you\'ll have (g)</label><input type="text" id="' + id + 'v"' + a + ' data-lf="have" value="' + esc(L.have) + '" inputmode="decimal" min="0" step="any" placeholder="optional">' + (i === 0 ? '<p class="hint">We warn you if the build needs more.</p>' : '') + '</div></div>';
   }).join('');
 }
+
+/* a recipe the baker typed (not an example recipe with a new count) */
+var EX_SIGS = example().breads.map(recipeSig);
+function recipeSig(b){ return (b.ing || []).map(function(g){ return num(g.a); }).filter(function(a){ return a > 0; }).join('/'); }
+function ownRecipe(){ return S.breads.some(function(b){ return num(b.count) > 0 && EX_SIGS.indexOf(recipeSig(b)) < 0; }); }
 
 /* ---------- render: the sheet ---------- */
 var lastPlan = null;
@@ -675,7 +694,7 @@ function renderSheet(){
   P.notes.forEach(function(n){ h += '<div class="hint" style="margin:4px 0 0;color:#3a2a1c">' + esc(n) + '</div>'; });
 
   /* pull list */
-  h += '<h4>Weigh out in total <small>for everything, incl. levain</small></h4><table><tbody>';
+  h += '<h4>Weigh out in total <small>incl. flour &amp; water for the levain feed</small></h4><table><tbody>';
   P.pull.forEach(function(p){ h += '<tr><td>' + esc(p.n) + '</td><td class="r g">' + fmtG(p.g) + '</td></tr>'; });
   h += '</tbody></table>';
 
@@ -690,7 +709,7 @@ function renderSheet(){
   /* mixes */
   h += '<h4>Mixes <small>in this order</small></h4><div class="mixes">';
   P.batches.forEach(function(bt, i){
-    h += '<div class="batch" style="--c:' + bt.bread.color + '"><div class="bt"><span><span class="box"></span> ' + (i + 1) + '. ' + esc(bt.bread.name) + (bt.n > 1 ? ' (' + bt.k + ' of ' + bt.n + ')' : '') + '</span><span class="g">' + clockOf(bt.start) + ' · ' + fmtG(bt.g) + '</span></div><div class="mx">' + plural(bt.loaves, 'loaf', 'loaves') + ' · shape ' + clockOf(bt.shapeStart) + ' · ' + (S.day.retard ? 'fridge ' : 'proof ') + clockOf(bt.cold) + '</div><table><tbody>';
+    h += '<div class="batch" style="--c:' + bt.bread.color + '"><div class="bt"><span><span class="box"></span> ' + (i + 1) + '. ' + esc(bt.bread.name) + (bt.n > 1 ? ' (' + bt.k + ' of ' + bt.n + ')' : '') + '</span><span class="g">' + clockOf(bt.start) + ' · ' + fmtG(bt.g) + ' dough</span></div><div class="mx">' + plural(bt.loaves, 'loaf', 'loaves') + ' · shape ' + clockOf(bt.shapeStart) + ' · ' + (S.day.retard ? 'fridge ' : 'proof ') + clockOf(bt.cold) + '</div><table><tbody>';
     bt.lines.forEach(function(l){ h += '<tr><td>' + esc(l.n) + '</td><td class="r g">' + fmtG(l.g) + '</td></tr>'; });
     h += '</tbody></table></div>';
   });
@@ -714,10 +733,10 @@ function renderSheet(){
     + (isPro() ? '<span>Bake Day</span>' : '<span>Made with Bake Day · free at samsbench.com/bake-day</span>') + '</div>';
   el.innerHTML = h;
 
-  if(P.lev){ $('barTxt').innerHTML = 'Feed ' + esc(P.levs.length > 1 ? 'first levain' : P.lev.name.toLowerCase()) + ' <b>' + esc(dayLabel(P.feed)) + ' ' + clockOf(P.feed) + '</b>' + (P.levs.length === 1 ? ' · ' + fmtG(P.lev.total) : ''); }
+  if(P.lev){ $('barTxt').innerHTML = 'Feed ' + esc(P.levs.length > 1 ? 'first levain' : P.lev.name.toLowerCase()) + ' <b>' + esc(dayLabel(P.feed)) + ' ' + clockOf(P.feed) + '</b>' + (P.levs.length === 1 ? ' · ' + fmtG(P.lev.total) + ' total' : ''); }
   else $('barTxt').innerHTML = 'Start mixing <b>' + esc(dayLabel(P.mixStart)) + ' ' + clockOf(P.mixStart) + '</b>';
   $('bar').classList.add('on');
-  if(P.ok && !S.example) trackOnce('sheet-ready');
+  if(P.ok && !S.example && ownRecipe()) trackOnce('sheet-ready');
   return P;
 }
 
@@ -770,7 +789,10 @@ function renderPro(){
 /* ---------- paste orders (Pro) ----------
    Three shapes: a CSV/TSV export with an item column and a quantity column; a wide form export with one column per bread;
    or free lines ("2 Country loaf, 1 Seeded", "Seeded x3"). Times, dates, prices, weights and order numbers are never read as quantities. */
-function norm(x){ return String(x == null ? '' : x).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, ' ').trim(); }
+var NUMW = {a: 1, an: 1, one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, eleven: 11, twelve: 12, dozen: 12};
+function stem(w){ if(w === 'loaves') return 'loaf'; if(w.length > 4 && /ies$/.test(w)) return w.slice(0, -3) + 'y'; if(w.length > 4 && /(ches|shes|xes|sses)$/.test(w)) return w.slice(0, -2); if(w.length > 3 && /[^s]s$/.test(w)) return w.slice(0, -1); return w; }
+/* names and order text go through the same cleanup: accents, case, punctuation, plurals ("Country loaves" = "Country loaf") */
+function norm(x){ return String(x == null ? '' : x).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/&/g, ' and ').replace(/[^a-z0-9%]+/g, ' ').trim().split(' ').map(stem).join(' '); }
 function splitRow(line, sep){
   var out = [], cur = '', q = false;
   for(var i = 0; i < line.length; i++){
@@ -790,7 +812,8 @@ function cleanLine(raw){
     .replace(/\b(jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\.?\s+\d{1,2}(st|nd|rd|th)?\b/gi, ' ')
     .replace(/\b\d{1,2}(st|nd|rd|th)?\s+(jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\b/gi, ' ')
     .replace(/[$£€]\s*\d+([.,]\d+)?/g, ' ').replace(/\b\d+([.,]\d+)?\s*(usd|eur|gbp|dollars?)\b/gi, ' ')
-    .replace(/\b\d+([.,]\d+)?\s*(g|kg|gr|grams?|lbs?|oz|%)(?![a-z])/gi, ' ')
+    .replace(/\b\d+([.,]\d+)?\s*(g|kg|gr|grams?|lbs?|oz)(?![a-z])/gi, ' ')
+    .replace(/\b(order|pickup|pick-up|slot|table|ticket|id|no|number|invoice|ref)\s*[:#.]?\s*\d+/gi, ' ')
     .replace(/#\s*\d+/g, ' ').replace(/\b\d{4,}\b/g, ' ')
     .replace(/\b(\d+)\.0+\b/g, '$1').replace(/\b\d+[.,]\d+\b/g, ' ') + ' ';
 }
@@ -803,10 +826,17 @@ function parseOrders(text, breads){
   if(!lines.length) return {counts: counts, unmatched: unmatched, mode: mode};
   var sep = lines[0].indexOf('\t') >= 0 ? '\t' : (lines[0].split(';').length > lines[0].split(',').length ? ';' : ',');
   var head = splitRow(lines[0], sep);
-  if(head.length >= 2 && lines.length >= 2 && !head.some(function(h){ return /\d/.test(h); })){
-    var hn = head.map(norm);
-    var qcol = hn.findIndex(function(h){ return /^(qty|quantity|count|amount|units|number|no|how many)\b/.test(h) || / (qty|quantity)$/.test(h); });
-    var icol = hn.findIndex(function(h, j){ return j !== qcol && /(item|product|name|title|description|bread|variant)/.test(h) && !/customer|buyer|first|last|email/.test(h); });
+  var looksData = function(h){ var c = h.replace(/[$£€]\s*\d+([.,]\d+)?/g, '').trim(); return /^\d/.test(c) || /\s\d+$/.test(c) || /^[\d\s.,:\/-]+$/.test(c); };
+  if(head.length >= 2 && lines.length >= 2 && !head.some(looksData)){
+    var hn = head.map(function(h){ return norm(h.replace(/[$£€]\s*\d+([.,]\d+)?/g, ' ')); });
+    var qcol = hn.findIndex(function(h){ return /\b(qty|quantity)\b/.test(h) || /^(count|amount|unit|how many)$/.test(h); });
+    var irank = function(h, j){
+      if(j === qcol || /#/.test(head[j]) || /\b(id|sku|number|email|customer|buyer|first|last|phone|note|date|time|price|total)\b/.test(h)) return 0;
+      if(/(lineitem name|item name|product name|line item|product title)/.test(h)) return 3;
+      if(/\b(item|product|description|title|bread|variant)\b/.test(h)) return 2;
+      if(h === 'name') return 1;
+      return 0; };
+    var icol = -1, best = 0; hn.forEach(function(h, j){ var r = irank(h, j); if(r > best){ best = r; icol = j; } });
     var wide = head.map(function(h){ return findBread(h); });
     var wideN = wide.filter(Boolean).length;
     if(wideN >= 1 && (qcol < 0 || icol < 0)){
@@ -839,7 +869,8 @@ function parseOrders(text, breads){
     });
     if(!hits.length){ unmatched.push(raw.trim()); return; }
     hits.sort(function(a, b){ return a.st - b.st; });
-    var before = function(k){ var seg = l.slice(k ? hits[k - 1].en : 0, hits[k].st), m = seg.match(/(?:^|\s)(\d{1,3})\s*(?:x\s*)?$/); return m ? parseInt(m[1], 10) : null; };
+    var qn = function(t){ return /^\d+$/.test(t) ? parseInt(t, 10) : NUMW[t]; };
+    var before = function(k){ var seg = l.slice(k ? hits[k - 1].en : 0, hits[k].st), m = seg.match(/(?:^|\s)(\d{1,3}|an?|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|dozen)\s*(?:x\s*)?$/); return m ? qn(m[1]) : null; };
     var after = function(k){ var seg = l.slice(hits[k].en, k + 1 < hits.length ? hits[k + 1].st : l.length), m = seg.match(/^\s*(?:x\s*|qty\s*|quantity\s*)?(\d{1,3})(?:\s|$)/) || seg.match(/^\s*(\d{1,3})\s*x(?:\s|$)/); return m ? parseInt(m[1], 10) : null; };
     var qtyFirst = before(0) != null;
     hits.forEach(function(h, k){
@@ -858,7 +889,7 @@ function parseOrders(text, breads){
 
 /* ---------- events ---------- */
 var started = false, pendingPaste = null;
-function changed(){ if(!started && !S.example){ started = true; trackOnce('tool-start'); } save(); renderLevs(false); renderSheet(); }
+function changed(){ if(!started && !S.example){ started = true; trackOnce('tool-start'); } renderLevs(false); save(); renderSheet(); }
 function toast(msg){ var t = $('toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toast.h); toast.h = setTimeout(function(){ t.classList.remove('on'); }, 1800); }
 function renderAll(){ renderBreads(); fillSettings(); renderPro(); renderSheet(); }
 
@@ -866,7 +897,11 @@ document.addEventListener('input', function(e){
   var t = e.target, d = t.dataset;
   if(d.b != null && d.f){
     var b = S.breads[+d.b]; if(!b) return;
-    if(d.g != null){ var g = b.ing[+d.g]; if(!g) return; g[d.f] = t.value; }
+    if(d.g != null){ var g = b.ing[+d.g]; if(!g) return;
+      var oldKey = g.k === 'levain' && d.f === 'n' ? levKey(g.n) : null;
+      g[d.f] = t.value;
+      if(oldKey){ var nk = levKey(g.n); S.levx = S.levx || {}; if(nk !== oldKey && S.levx[oldKey] && !S.levx[nk]) S.levx[nk] = JSON.parse(JSON.stringify(S.levx[oldKey])); }   // renaming a levain line keeps its feed settings
+    }
     else b[d.f] = t.value;
     if(S.example){ S.example = false; }
     changed(); return;
@@ -888,7 +923,7 @@ document.addEventListener('click', function(e){
   var t = e.target.closest('button,a'); if(!t) return;
   var d = t.dataset;
   if(t.id === 'btnHeroExample' || t.id === 'btnEmptyEx'){
-    var hasOwn = !S.example && S.breads.some(function(b){ return num(b.count) > 0 || (b.name || '').trim(); });
+    var hasOwn = !S.example && (S.breads.length > 1 || S.breads.some(function(b){ return num(b.count) > 0 || (b.name || '').trim() || b.ing.some(function(g){ return String(g.a == null ? '' : g.a).trim() !== ''; }); }));
     if(hasOwn && !confirm('Replace your breads with the example? Your own numbers will be lost.')) return;
     S = example(); save(); track('example'); renderAll(); toast('Example bakery loaded');
     if(window.matchMedia('(max-width:1060px)').matches) $('breadsSec').scrollIntoView({behavior: 'smooth'});
@@ -915,22 +950,22 @@ document.addEventListener('click', function(e){
     if(k.indexOf('@') < 0){
       checkGift(k).then(function(ok){ t.disabled = false;
         if(ok){ PRO.key = 'gift:' + k.toUpperCase().replace(/\s+/g, ''); PRO.kind = 'lifetime'; savePro(); track('pro-unlocked-gift'); renderAll(); toast('Pro unlocked'); }
-        else $('licNote').textContent = 'That gift code was not recognised. Check the spelling, or enter the email you paid with.'; });
+        else { track('unlock-fail'); gcCount('unlock-fail-gift'); } if(!ok) $('licNote').textContent = 'That gift code was not recognised. Check the spelling, or enter the email you paid with.'; });
       return;
     }
     verifyLicense(k.toLowerCase()).then(function(j){ t.disabled = false;
       if(j.valid){ PRO.key = k.toLowerCase(); PRO.kind = j.kind || 'lifetime'; savePro(); track('pro-unlocked'); renderAll(); toast('Pro unlocked'); }
-      else $('licNote').textContent = 'No Pro purchase found for that email. Use the email on your Whop receipt; if it still fails, reply to the receipt and we will sort it out.';
-    }, function(){ t.disabled = false; $('licNote').textContent = 'Could not check right now. Check your connection and try again in a minute.'; });
+      else { track('unlock-fail'); gcCount('unlock-fail-email'); } if(!j.valid) $('licNote').textContent = 'No Pro purchase found for that email. Use the email on your Whop receipt; if it still fails, reply to the receipt and we will sort it out.';
+    }, function(){ t.disabled = false; track('unlock-fail'); gcCount('unlock-fail-net'); $('licNote').textContent = 'Could not check right now. Check your connection and try again in a minute.'; });
     return;
   }
   if(t.id === 'btnPaste'){
     var r = parseOrders($('pasteIn').value, S.breads), add = $('pasteAdd').checked, rows = [], any = Object.keys(r.counts).length;
     pendingPaste = null;
-    if(!any){ $('pasteNote').textContent = 'No bread names found. The lines need to mention your breads by the names on this page.' + (r.unmatched.length ? ' First line: ' + r.unmatched[0] : ''); return; }
+    if(!any){ track('paste-none'); $('pasteNote').textContent = 'No bread names found. The lines need to mention your breads by the names on this page.' + (r.unmatched.length ? ' First line: ' + r.unmatched[0] : ''); return; }
     var next = S.breads.map(function(b, i){ var cur = Math.max(0, Math.round(num(b.count))); return add ? cur + (r.counts[i] || 0) : (r.counts[i] || 0); });
     S.breads.forEach(function(b, i){ rows.push('<tr><td>' + esc(b.name || ('Bread ' + (i + 1))) + '</td><td class="num" style="text-align:right">' + Math.max(0, Math.round(num(b.count))) + ' → <b>' + next[i] + '</b></td></tr>'); });
-    pendingPaste = next;
+    pendingPaste = {}; S.breads.forEach(function(b, i){ pendingPaste[b.id] = next[i]; });
     $('pasteNote').innerHTML = '<table style="border-collapse:collapse;margin:4px 0 8px">' + rows.join('') + '</table>'
       + (r.unmatched.length ? '<span>Not matched to a bread (' + r.unmatched.length + '): ' + esc(r.unmatched.slice(0, 4).join(' | ')) + (r.unmatched.length > 4 ? ' …' : '') + '</span><br>' : '')
       + '<button class="btn small primary" type="button" id="btnPasteUse">Use these counts</button>';
@@ -938,7 +973,7 @@ document.addEventListener('click', function(e){
   }
   if(t.id === 'btnPasteUse'){
     if(!pendingPaste) return;
-    S.breads.forEach(function(b, i){ b.count = pendingPaste[i]; });
+    S.breads.forEach(function(b){ if(pendingPaste[b.id] != null) b.count = pendingPaste[b.id]; });
     pendingPaste = null; S.example = false; track('paste-orders'); renderBreads(); changed();
     $('pasteNote').textContent = 'Counts updated.';
     return;
@@ -954,9 +989,11 @@ document.addEventListener('click', function(e){
   if(d.delday != null){ var ds2 = getDays(), y = ds2[+d.delday]; if(y && confirm('Delete ' + y.title + '?')){ ds2.splice(+d.delday, 1); setDays(ds2); renderPro(); } return; }
   if(t.matches('a[data-buy]')){ track('buy-click'); return; }
 });
+document.addEventListener('auxclick', function(e){ var a = e.target.closest && e.target.closest('a[data-buy]'); if(a) track('buy-click'); });
 /* Pro section seen: counted once per tab when at least half of it is on screen */
 if('IntersectionObserver' in window){
-  var io = new IntersectionObserver(function(es){ es.forEach(function(en){ if(en.isIntersecting && !isPro()) trackOnce('pro-view'); }); }, {threshold: 0.5});
+  var BOUGHT = /[?&]bought=1/.test(location.search);
+  var io = new IntersectionObserver(function(es){ es.forEach(function(en){ if(en.isIntersecting && !isPro() && !BOUGHT) trackOnce('pro-view'); }); }, {threshold: 0.5});
   setTimeout(function(){ io.observe($('proSec')); }, 1500);
 }
 window.addEventListener('beforeprint', function(){ if(lastPlan && lastPlan.pieces) trackOnce('print-dialog'); });
@@ -972,12 +1009,13 @@ if(returning) trackOnce('return-visit');
 if(GC_CODE){ var gs = document.createElement('script'); gs.async = true; gs.src = '//gc.zgo.at/count.js'; gs.setAttribute('data-goatcounter', 'https://' + GC_CODE + '.goatcounter.com/count'); document.head.appendChild(gs); }
 (function(){
   var q = new URLSearchParams(location.search);
-  var via = (q.get('via') || '').replace(/[^a-z0-9-]/g, '').slice(0, 20), af = (q.get('a') || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 40);
-  if(via) track('via-' + via);
+  var via = cleanVia(q.get('via')), af = (q.get('a') || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 40);
+  if(via) gcCount('via-' + via);
   /* ?via=selftest: fire every funnel event once (plain + ".selftest"), so delivery can be checked from a real browser on the laptop.
      Server browsers are filtered out by GoatCounter. Subtract these from real numbers: see STATUS.md "自检". */
-  if(via === 'selftest') setTimeout(function(){ Object.keys(FUNNEL_EV).concat(['print-dialog']).forEach(function(n, i){ setTimeout(function(){ track(n); }, i * 400); }); }, 1500);
+  if(via === 'selftest') setTimeout(function(){ Object.keys(FUNNEL_EV).forEach(function(n, i){ setTimeout(function(){ gcCount(n + '.selftest'); }, i * 800); }); }, 1500);
   if(af) track('aff-' + af);
+  if(q.get('bought') === '1') track('bought-return');
   if(q.get('bought') === '1' && !isPro()){
     setTimeout(function(){ var ln = $('licNote'), lk = $('licKey'); if(ln) ln.textContent = 'Thanks! Enter the email you just used on Whop and press Unlock Pro.'; $('proSec').scrollIntoView(); if(lk) lk.focus(); }, 400);
   }
