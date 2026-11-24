@@ -321,6 +321,7 @@ function example(){
     {id:'bx2', name:'Seeded', portion:950, count:8, ing:[{n:'Bread flour',a:800,k:'flour'},{n:'Whole wheat flour',a:200,k:'flour'},{n:'Water',a:800,k:'water'},{n:'Levain',a:200,k:'levain'},{n:'Salt',a:22,k:'salt'},{n:'Seed mix (soaked)',a:150,k:'other'}]},
     {id:'bx3', name:'Olive & rosemary', portion:900, count:6, ing:[{n:'Bread flour',a:1000,k:'flour'},{n:'Water',a:720,k:'water'},{n:'Levain',a:200,k:'levain'},{n:'Salt',a:22,k:'salt'},{n:'Olives',a:200,k:'other'}]}
   ];
+  s.levx = {levain: {s: 1, f: 10, w: 10, hours: 14}};   // a 1:10:10 feed ripens slower, so the example's feed lands in the evening, not after midnight
   s.day.mCap = 8; s.day.mMin = 25; s.day.oCap = 8; s.day.oMin = 45; s.day.oPre = 60; s.day.bulkH = 5; s.day.shapeM = 1.5; s.day.restM = 20; s.day.retard = true; s.day.retH = 12; s.day.ready = '08:00';
   return s;
 }
