@@ -221,7 +221,7 @@ footer a{color:var(--ink)}
     <p>A free production planner for micro bakeries. Put in your breads once and how many of each you're baking. Get the dough for every mix, one levain build for all of it, and a clock schedule worked back from when the last loaf leaves the oven. Print it for the wall by the oven.</p>
     <div class="cta"><button class="btn primary" type="button" id="btnHeroExample">See it with an example bakery</button><a class="btn" href="#breadsSec">Start with my breads</a></div>
   </div>
-  <div class="stamp">Free · no sign-up<br>saved on this device only</div>
+  <div class="stamp">Free · no sign-up<br>your recipes stay on this device</div>
 </div></header>
 
 <main class="wrap">
@@ -289,7 +289,7 @@ footer a{color:var(--ink)}
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <footer>
-  <p>Bake Day works out the numbers from what you type. Check the sheet against your own recipe the first time you use it. Nothing you type leaves this device. Made by Sam at <a href="https://samsbench.com/?via=bd-footer">Sam's Bench</a>.</p>
+  <p>Bake Day works out the numbers from what you type. Check the sheet against your own recipe the first time you use it. Your recipes and orders stay on this device; only the email you type to unlock Pro is sent, to check the purchase. Made by Sam at <a href="https://samsbench.com/?via=bd-footer">Sam's Bench</a>.</p>
 </footer>
 
 <script>
@@ -780,7 +780,7 @@ function renderPro(){
     h += '<h2 id="hPro">Bake Day Pro' + (PRICE ? ' <span class="price">' + esc(PRICE) + '</span>' : '') + '</h2>';
     h += '<p class="lead" style="margin:4px 0 0">One payment, no subscription.</p><ul><li><b>As many breads as you bake.</b> Free stops at ' + FREE_BREADS + '.</li><li><b>Paste your orders</b> from Hotplate, a form or your notes, and the counts fill themselves in.</li><li><b>Save each bake day</b> (Tuesday pickups, Friday market) and switch between them.</li><li>No “made with” line on your printed sheet.</li></ul>';
     h += url ? '<p><a class="btn primary" data-buy="1" href="' + esc(url) + '" rel="noopener">Get Pro' + (PRICE ? ' for ' + esc(PRICE) : '') + '</a></p>' : '<p class="hint">Pro opens soon. Got a gift code? Enter it below.</p>';
-    h += '<div class="row" style="margin-top:14px"><div><label class="f" for="licKey">Already bought? The email you paid with, or your gift code</label><input type="text" id="licKey" autocomplete="email" spellcheck="false" placeholder="you@bakery.com or GIFT-CODE"></div><div style="flex:0"><button class="btn" type="button" id="btnLic">Unlock Pro</button></div></div><p class="actnote" id="licNote" aria-live="polite"></p>';
+    h += '<div class="row" style="margin-top:14px"><div><label class="f" for="licKey">Got a gift code, or already bought? Enter the code, or the email you paid with</label><input type="text" id="licKey" autocomplete="email" spellcheck="false" placeholder="you@bakery.com or GIFT-CODE"></div><div style="flex:0"><button class="btn" type="button" id="btnLic">Unlock Pro</button></div></div><p class="actnote" id="licNote" aria-live="polite"></p>';
   }
   el.innerHTML = h;
 }
