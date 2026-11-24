@@ -565,7 +565,7 @@ var SRC = (function(){ try{
   if(v){ sessionStorage.setItem('bd.src', v); return v; }
   return sessionStorage.getItem('bd.src') || '';
 }catch(e){ return ''; } })();
-var FUNNEL_EV = {'example':1, 'tool-start':1, 'sheet-ready':1, 'export-print':1, 'export-copy':1, 'limit-hit':1, 'pro-view':1, 'buy-click':1, 'pro-unlocked':1, 'pro-unlocked-gift':1, 'paste-orders':1, 'save-day':1};
+var FUNNEL_EV = {'return-visit':1, 'example':1, 'tool-start':1, 'sheet-ready':1, 'export-print':1, 'export-copy':1, 'limit-hit':1, 'pro-view':1, 'buy-click':1, 'pro-unlocked':1, 'pro-unlocked-gift':1, 'paste-orders':1, 'save-day':1};
 var ONCE = {};
 function track(name, tries){
   try{
@@ -964,13 +964,19 @@ window.addEventListener('beforeprint', function(){ if(lastPlan && lastPlan.piece
 /* ---------- boot ---------- */
 loadPro(); affCode();
 var had = load();
+var returning = had && !S.example && plan(S).pieces > 0;   // came back to a plan of their own: counted as return-visit, not a new sheet-ready
 if(had && !S.example) started = true;
+if(returning){ ONCE['sheet-ready'] = 1; }
 renderAll();
+if(returning) trackOnce('return-visit');
 if(GC_CODE){ var gs = document.createElement('script'); gs.async = true; gs.src = '//gc.zgo.at/count.js'; gs.setAttribute('data-goatcounter', 'https://' + GC_CODE + '.goatcounter.com/count'); document.head.appendChild(gs); }
 (function(){
   var q = new URLSearchParams(location.search);
   var via = (q.get('via') || '').replace(/[^a-z0-9-]/g, '').slice(0, 20), af = (q.get('a') || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 40);
   if(via) track('via-' + via);
+  /* ?via=selftest: fire every funnel event once (plain + ".selftest"), so delivery can be checked from a real browser on the laptop.
+     Server browsers are filtered out by GoatCounter. Subtract these from real numbers: see STATUS.md "自检". */
+  if(via === 'selftest') setTimeout(function(){ Object.keys(FUNNEL_EV).concat(['print-dialog']).forEach(function(n, i){ setTimeout(function(){ track(n); }, i * 400); }); }, 1500);
   if(af) track('aff-' + af);
   if(q.get('bought') === '1' && !isPro()){
     setTimeout(function(){ var ln = $('licNote'), lk = $('licKey'); if(ln) ln.textContent = 'Thanks! Enter the email you just used on Whop and press Unlock Pro.'; $('proSec').scrollIntoView(); if(lk) lk.focus(); }, 400);
